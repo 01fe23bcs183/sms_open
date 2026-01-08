@@ -271,10 +271,10 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        <a href="{{ route('users.index') ?? '#' }}" class="btn btn-outline-primary text-start">
+                        <a href="#" class="btn btn-outline-primary text-start">
                             <i class="bi bi-people me-2"></i> Manage Users
                         </a>
-                        <a href="{{ route('settings.general') ?? '#' }}" class="btn btn-outline-secondary text-start">
+                        <a href="{{ route('settings.general', [], false) }}" class="btn btn-outline-secondary text-start">
                             <i class="bi bi-gear me-2"></i> General Settings
                         </a>
                     </div>
