@@ -538,6 +538,251 @@ Route::prefix('test-exams')->middleware(['auth'])->group(function () {
             ]),
         ]);
     })->name('test.exam-grades.index');
+
+    Route::get('/grades/create', function () {
+        return view('admin.exam-grades.create');
+    })->name('test.exam-grades.create');
+
+    Route::get('/report-card', function () {
+        return view('admin.exams.report-card', [
+            'academicSessions' => collect([
+                (object)['id' => 1, 'name' => '2025-2026', 'is_active' => true],
+            ]),
+            'classes' => collect([
+                (object)['id' => 1, 'name' => 'Class 1'],
+                (object)['id' => 2, 'name' => 'Class 2'],
+            ]),
+            'exams' => collect([
+                (object)['id' => 1, 'name' => 'Mid-Term Exam 2025-26'],
+                (object)['id' => 2, 'name' => 'Final Exam 2025-26'],
+            ]),
+        ]);
+    })->name('test.exams.report-card');
+
+    Route::get('/report-card-print', function () {
+        return view('admin.exams.report-card-print');
+    })->name('test.exams.report-card-print');
+
+    Route::get('/statistics', function () {
+        return view('admin.exams.statistics', [
+            'academicSessions' => collect([
+                (object)['id' => 1, 'name' => '2025-2026', 'is_active' => true],
+            ]),
+            'classes' => collect([
+                (object)['id' => 1, 'name' => 'Class 1'],
+                (object)['id' => 2, 'name' => 'Class 2'],
+            ]),
+            'exams' => collect([
+                (object)['id' => 1, 'name' => 'Mid-Term Exam 2025-26'],
+                (object)['id' => 2, 'name' => 'Final Exam 2025-26'],
+            ]),
+            'subjects' => collect([
+                (object)['id' => 1, 'name' => 'Mathematics'],
+                (object)['id' => 2, 'name' => 'English'],
+                (object)['id' => 3, 'name' => 'Science'],
+            ]),
+        ]);
+    })->name('test.exams.statistics');
+
+    Route::get('/rank-list', function () {
+        return view('admin.exams.rank-list', [
+            'academicSessions' => collect([
+                (object)['id' => 1, 'name' => '2025-2026', 'is_active' => true],
+            ]),
+            'classes' => collect([
+                (object)['id' => 1, 'name' => 'Class 1'],
+                (object)['id' => 2, 'name' => 'Class 2'],
+            ]),
+            'exams' => collect([
+                (object)['id' => 1, 'name' => 'Mid-Term Exam 2025-26'],
+                (object)['id' => 2, 'name' => 'Final Exam 2025-26'],
+            ]),
+        ]);
+    })->name('test.exams.rank-list');
+});
+
+// Named route aliases for fee management views (temporary - remove after backend is implemented)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/fee-types', fn() => redirect('/test-fees/types'))->name('fee-types.index');
+    Route::get('/fee-types/create', fn() => redirect('/test-fees/types/create'))->name('fee-types.create');
+    Route::post('/fee-types', fn() => back()->with('success', 'Fee type created!'))->name('fee-types.store');
+    Route::get('/fee-types/{id}/edit', fn($id) => redirect('/test-fees/types'))->name('fee-types.edit');
+    Route::put('/fee-types/{id}', fn($id) => back()->with('success', 'Fee type updated!'))->name('fee-types.update');
+    Route::delete('/fee-types/{id}', fn($id) => back()->with('success', 'Fee type deleted!'))->name('fee-types.destroy');
+    
+    Route::get('/fee-groups', fn() => redirect('/test-fees/groups'))->name('fee-groups.index');
+    Route::get('/fee-groups/create', fn() => redirect('/test-fees/groups/create'))->name('fee-groups.create');
+    Route::post('/fee-groups', fn() => back()->with('success', 'Fee group created!'))->name('fee-groups.store');
+    Route::get('/fee-groups/{id}/edit', fn($id) => redirect('/test-fees/groups'))->name('fee-groups.edit');
+    Route::put('/fee-groups/{id}', fn($id) => back()->with('success', 'Fee group updated!'))->name('fee-groups.update');
+    Route::delete('/fee-groups/{id}', fn($id) => back()->with('success', 'Fee group deleted!'))->name('fee-groups.destroy');
+    
+    Route::get('/fee-masters', fn() => redirect('/test-fees/masters'))->name('fee-masters.index');
+    Route::get('/fee-masters/create', fn() => redirect('/test-fees/masters/create'))->name('fee-masters.create');
+    Route::post('/fee-masters', fn() => back()->with('success', 'Fee master created!'))->name('fee-masters.store');
+    Route::get('/fee-masters/{id}/edit', fn($id) => redirect('/test-fees/masters'))->name('fee-masters.edit');
+    Route::put('/fee-masters/{id}', fn($id) => back()->with('success', 'Fee master updated!'))->name('fee-masters.update');
+    Route::delete('/fee-masters/{id}', fn($id) => back()->with('success', 'Fee master deleted!'))->name('fee-masters.destroy');
+    
+    Route::get('/exams/report-card', fn() => redirect('/test-exams/report-card'))->name('exams.report-card');
+    Route::get('/exams/report-card/print', fn() => redirect('/test-exams/report-card-print'))->name('exams.report-card.print');
+    Route::get('/exams/statistics', fn() => redirect('/test-exams/statistics'))->name('exams.statistics');
+    Route::get('/exams/rank-list', fn() => redirect('/test-exams/rank-list'))->name('exams.rank-list');
+    Route::get('/exam-grades/create', fn() => redirect('/test-exams/grades/create'))->name('exam-grades.create');
+});
+
+// Temporary test routes for Session 19 fee management views (remove after testing)
+Route::prefix('test-fees')->middleware(['auth'])->group(function () {
+    Route::get('/types', function () {
+        return view('admin.fee-types.index', [
+            'feeTypes' => collect([
+                (object)['id' => 1, 'name' => 'Tuition Fee', 'code' => 'TUI', 'description' => 'Monthly tuition fee for academic instruction', 'is_active' => true, 'is_refundable' => false, 'created_at' => now()->subDays(30)],
+                (object)['id' => 2, 'name' => 'Admission Fee', 'code' => 'ADM', 'description' => 'One-time admission fee', 'is_active' => true, 'is_refundable' => false, 'created_at' => now()->subDays(30)],
+                (object)['id' => 3, 'name' => 'Library Fee', 'code' => 'LIB', 'description' => 'Annual library membership fee', 'is_active' => true, 'is_refundable' => true, 'created_at' => now()->subDays(25)],
+                (object)['id' => 4, 'name' => 'Laboratory Fee', 'code' => 'LAB', 'description' => 'Science laboratory usage fee', 'is_active' => true, 'is_refundable' => false, 'created_at' => now()->subDays(20)],
+                (object)['id' => 5, 'name' => 'Transport Fee', 'code' => 'TRN', 'description' => 'Monthly school bus transport fee', 'is_active' => true, 'is_refundable' => true, 'created_at' => now()->subDays(15)],
+                (object)['id' => 6, 'name' => 'Sports Fee', 'code' => 'SPT', 'description' => 'Annual sports and games fee', 'is_active' => false, 'is_refundable' => false, 'created_at' => now()->subDays(10)],
+            ]),
+        ]);
+    })->name('test.fee-types.index');
+
+    Route::get('/types/create', function () {
+        return view('admin.fee-types.create');
+    })->name('test.fee-types.create');
+
+    Route::get('/groups', function () {
+        return view('admin.fee-groups.index', [
+            'feeGroups' => collect([
+                (object)['id' => 1, 'name' => 'Monthly Fees', 'description' => 'Fees collected every month', 'is_active' => true, 'fee_types_count' => 2, 'fee_types' => [(object)['id' => 1, 'name' => 'Tuition Fee'], (object)['id' => 5, 'name' => 'Transport Fee']], 'created_at' => now()->subDays(30), 'updated_at' => now()->subDays(5)],
+                (object)['id' => 2, 'name' => 'Annual Fees', 'description' => 'Fees collected once a year', 'is_active' => true, 'fee_types_count' => 3, 'fee_types' => [(object)['id' => 2, 'name' => 'Admission Fee'], (object)['id' => 3, 'name' => 'Library Fee'], (object)['id' => 6, 'name' => 'Sports Fee']], 'created_at' => now()->subDays(25), 'updated_at' => now()->subDays(3)],
+                (object)['id' => 3, 'name' => 'Lab Fees', 'description' => 'Laboratory related fees', 'is_active' => true, 'fee_types_count' => 1, 'fee_types' => [(object)['id' => 4, 'name' => 'Laboratory Fee']], 'created_at' => now()->subDays(20), 'updated_at' => now()->subDays(1)],
+                (object)['id' => 4, 'name' => 'Optional Fees', 'description' => 'Optional fees for extra activities', 'is_active' => false, 'fee_types_count' => 0, 'fee_types' => [], 'created_at' => now()->subDays(15), 'updated_at' => now()->subDays(15)],
+            ]),
+        ]);
+    })->name('test.fee-groups.index');
+
+    Route::get('/groups/create', function () {
+        return view('admin.fee-groups.create', [
+            'feeTypes' => collect([
+                (object)['id' => 1, 'name' => 'Tuition Fee', 'code' => 'TUI'],
+                (object)['id' => 2, 'name' => 'Admission Fee', 'code' => 'ADM'],
+                (object)['id' => 3, 'name' => 'Library Fee', 'code' => 'LIB'],
+                (object)['id' => 4, 'name' => 'Laboratory Fee', 'code' => 'LAB'],
+                (object)['id' => 5, 'name' => 'Transport Fee', 'code' => 'TRN'],
+                (object)['id' => 6, 'name' => 'Sports Fee', 'code' => 'SPT'],
+            ]),
+        ]);
+    })->name('test.fee-groups.create');
+
+    Route::get('/masters', function () {
+        return view('admin.fee-masters.index', [
+            'academicSessions' => collect([
+                (object)['id' => 1, 'name' => '2025-2026', 'is_active' => true],
+                (object)['id' => 2, 'name' => '2024-2025', 'is_active' => false],
+            ]),
+            'classes' => collect([
+                (object)['id' => 1, 'name' => 'Class 1'],
+                (object)['id' => 2, 'name' => 'Class 2'],
+                (object)['id' => 3, 'name' => 'Class 3'],
+            ]),
+            'sections' => collect([
+                (object)['id' => 1, 'name' => 'Section A'],
+                (object)['id' => 2, 'name' => 'Section B'],
+            ]),
+            'feeTypes' => collect([
+                (object)['id' => 1, 'name' => 'Tuition Fee', 'code' => 'TUI'],
+                (object)['id' => 2, 'name' => 'Library Fee', 'code' => 'LIB'],
+                (object)['id' => 3, 'name' => 'Transport Fee', 'code' => 'TRN'],
+            ]),
+            'feeMasters' => collect([
+                (object)[
+                    'id' => 1,
+                    'feeType' => (object)['id' => 1, 'name' => 'Tuition Fee', 'code' => 'TUI'],
+                    'feeGroup' => (object)['id' => 1, 'name' => 'Monthly Fees'],
+                    'class' => (object)['id' => 1, 'name' => 'Class 1'],
+                    'section' => (object)['id' => 1, 'name' => 'Section A'],
+                    'academicSession' => (object)['id' => 1, 'name' => '2025-2026'],
+                    'amount' => 5000.00,
+                    'due_date' => now()->addDays(15)->format('Y-m-d'),
+                    'is_active' => true,
+                    'description' => 'Monthly tuition fee for Class 1 Section A',
+                    'created_at' => now()->subDays(30)->format('Y-m-d H:i:s'),
+                ],
+                (object)[
+                    'id' => 2,
+                    'feeType' => (object)['id' => 1, 'name' => 'Tuition Fee', 'code' => 'TUI'],
+                    'feeGroup' => (object)['id' => 1, 'name' => 'Monthly Fees'],
+                    'class' => (object)['id' => 1, 'name' => 'Class 1'],
+                    'section' => (object)['id' => 2, 'name' => 'Section B'],
+                    'academicSession' => (object)['id' => 1, 'name' => '2025-2026'],
+                    'amount' => 5000.00,
+                    'due_date' => now()->addDays(15)->format('Y-m-d'),
+                    'is_active' => true,
+                    'description' => 'Monthly tuition fee for Class 1 Section B',
+                    'created_at' => now()->subDays(30)->format('Y-m-d H:i:s'),
+                ],
+                (object)[
+                    'id' => 3,
+                    'feeType' => (object)['id' => 2, 'name' => 'Library Fee', 'code' => 'LIB'],
+                    'feeGroup' => (object)['id' => 2, 'name' => 'Annual Fees'],
+                    'class' => (object)['id' => 1, 'name' => 'Class 1'],
+                    'section' => null,
+                    'academicSession' => (object)['id' => 1, 'name' => '2025-2026'],
+                    'amount' => 1500.00,
+                    'due_date' => now()->subDays(5)->format('Y-m-d'),
+                    'is_active' => true,
+                    'description' => 'Annual library fee for Class 1',
+                    'created_at' => now()->subDays(25)->format('Y-m-d H:i:s'),
+                ],
+                (object)[
+                    'id' => 4,
+                    'feeType' => (object)['id' => 3, 'name' => 'Transport Fee', 'code' => 'TRN'],
+                    'feeGroup' => (object)['id' => 1, 'name' => 'Monthly Fees'],
+                    'class' => (object)['id' => 2, 'name' => 'Class 2'],
+                    'section' => (object)['id' => 1, 'name' => 'Section A'],
+                    'academicSession' => (object)['id' => 1, 'name' => '2025-2026'],
+                    'amount' => 2500.00,
+                    'due_date' => now()->addDays(3)->format('Y-m-d'),
+                    'is_active' => true,
+                    'description' => 'Monthly transport fee',
+                    'created_at' => now()->subDays(20)->format('Y-m-d H:i:s'),
+                ],
+                (object)[
+                    'id' => 5,
+                    'feeType' => (object)['id' => 1, 'name' => 'Tuition Fee', 'code' => 'TUI'],
+                    'feeGroup' => (object)['id' => 1, 'name' => 'Monthly Fees'],
+                    'class' => (object)['id' => 3, 'name' => 'Class 3'],
+                    'section' => null,
+                    'academicSession' => (object)['id' => 1, 'name' => '2025-2026'],
+                    'amount' => 6000.00,
+                    'due_date' => now()->addDays(20)->format('Y-m-d'),
+                    'is_active' => false,
+                    'description' => 'Monthly tuition fee for Class 3',
+                    'created_at' => now()->subDays(15)->format('Y-m-d H:i:s'),
+                ],
+            ]),
+        ]);
+    })->name('test.fee-masters.index');
+
+    Route::get('/masters/create', function () {
+        return view('admin.fee-masters.create', [
+            'academicSessions' => collect([
+                (object)['id' => 1, 'name' => '2025-2026', 'is_active' => true],
+            ]),
+            'classes' => collect([
+                (object)['id' => 1, 'name' => 'Class 1'],
+                (object)['id' => 2, 'name' => 'Class 2'],
+            ]),
+            'feeTypes' => collect([
+                (object)['id' => 1, 'name' => 'Tuition Fee', 'code' => 'TUI'],
+                (object)['id' => 2, 'name' => 'Library Fee', 'code' => 'LIB'],
+            ]),
+            'feeGroups' => collect([
+                (object)['id' => 1, 'name' => 'Monthly Fees'],
+                (object)['id' => 2, 'name' => 'Annual Fees'],
+            ]),
+        ]);
+    })->name('test.fee-masters.create');
 });
 
 require __DIR__.'/auth.php';
