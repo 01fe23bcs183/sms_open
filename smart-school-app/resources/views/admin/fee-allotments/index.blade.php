@@ -302,7 +302,7 @@
                             <td>
                                 <div class="btn-group btn-group-sm">
                                     <a 
-                                        href="{{ route('fees.collect', ['student' => $allotment->student_id]) }}" 
+                                        href="{{ route('fees.collect', ['student' => $allotment->student->id ?? $allotment->student_id ?? 0]) }}" 
                                         class="btn btn-outline-success" 
                                         title="Collect Fee"
                                     >

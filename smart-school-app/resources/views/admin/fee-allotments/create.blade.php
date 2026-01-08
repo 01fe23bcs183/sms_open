@@ -126,7 +126,7 @@
                                     data-due-date="{{ $feeMaster->due_date }}"
                                 >
                                     {{ $feeMaster->feeType->name ?? 'N/A' }} - ${{ number_format($feeMaster->amount, 2) }}
-                                    @if($feeMaster->class) ({{ $feeMaster->class->name }}) @endif
+                                    @if(isset($feeMaster->class) && $feeMaster->class) ({{ $feeMaster->class->name }}) @endif
                                 </option>
                             @endforeach
                         </select>

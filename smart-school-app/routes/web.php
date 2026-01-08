@@ -44,7 +44,7 @@ Route::prefix('test-attendance')->middleware(['auth'])->group(function () {
     Route::get('/mark', function () {
         return view('teacher.attendance.mark', [
             'academicSessions' => collect([
-                (object)['id' => 1, 'name' => '2025-2026', 'is_active' => true],
+                (object)['id' => 1, 'name' => '2025-2026', 'is_current' => true],
                 (object)['id' => 2, 'name' => '2024-2025', 'is_active' => false],
             ]),
             'classes' => collect([
@@ -62,7 +62,7 @@ Route::prefix('test-attendance')->middleware(['auth'])->group(function () {
     Route::get('/index', function () {
         return view('admin.attendance.index', [
             'academicSessions' => collect([
-                (object)['id' => 1, 'name' => '2025-2026', 'is_active' => true],
+                (object)['id' => 1, 'name' => '2025-2026', 'is_current' => true],
             ]),
             'classes' => collect([
                 (object)['id' => 1, 'name' => 'Class 1'],
@@ -120,7 +120,7 @@ Route::prefix('test-attendance')->middleware(['auth'])->group(function () {
     Route::get('/report', function () {
         return view('admin.attendance.report', [
             'academicSessions' => collect([
-                (object)['id' => 1, 'name' => '2025-2026', 'is_active' => true],
+                (object)['id' => 1, 'name' => '2025-2026', 'is_current' => true],
             ]),
             'classes' => collect([
                 (object)['id' => 1, 'name' => 'Class 1'],
@@ -178,7 +178,7 @@ Route::prefix('test-attendance')->middleware(['auth'])->group(function () {
     Route::get('/export', function () {
         return view('admin.attendance.export', [
             'academicSessions' => collect([
-                (object)['id' => 1, 'name' => '2025-2026', 'is_active' => true],
+                (object)['id' => 1, 'name' => '2025-2026', 'is_current' => true],
             ]),
             'classes' => collect([
                 (object)['id' => 1, 'name' => 'Class 1'],
@@ -189,7 +189,7 @@ Route::prefix('test-attendance')->middleware(['auth'])->group(function () {
     Route::get('/sms', function () {
         return view('admin.attendance.sms', [
             'academicSessions' => collect([
-                (object)['id' => 1, 'name' => '2025-2026', 'is_active' => true],
+                (object)['id' => 1, 'name' => '2025-2026', 'is_current' => true],
             ]),
             'classes' => collect([
                 (object)['id' => 1, 'name' => 'Class 1'],
@@ -254,7 +254,7 @@ Route::prefix('test-exams')->middleware(['auth'])->group(function () {
     Route::get('/index', function () {
         return view('admin.exams.index', [
             'academicSessions' => collect([
-                (object)['id' => 1, 'name' => '2025-2026', 'is_active' => true],
+                (object)['id' => 1, 'name' => '2025-2026', 'is_current' => true],
                 (object)['id' => 2, 'name' => '2024-2025', 'is_active' => false],
             ]),
             'examTypes' => collect([
@@ -298,7 +298,7 @@ Route::prefix('test-exams')->middleware(['auth'])->group(function () {
     Route::get('/create', function () {
         return view('admin.exams.create', [
             'academicSessions' => collect([
-                (object)['id' => 1, 'name' => '2025-2026', 'is_active' => true],
+                (object)['id' => 1, 'name' => '2025-2026', 'is_current' => true],
             ]),
             'examTypes' => collect([
                 (object)['id' => 1, 'name' => 'Mid-Term Examination'],
@@ -387,7 +387,7 @@ Route::prefix('test-exams')->middleware(['auth'])->group(function () {
     Route::get('/teacher-marks', function () {
         return view('teacher.exams.marks', [
             'academicSessions' => collect([
-                (object)['id' => 1, 'name' => '2025-2026', 'is_active' => true],
+                (object)['id' => 1, 'name' => '2025-2026', 'is_current' => true],
             ]),
             'classes' => collect([
                 (object)['id' => 1, 'name' => 'Class 1'],
@@ -425,7 +425,7 @@ Route::prefix('test-exams')->middleware(['auth'])->group(function () {
     Route::get('/admin-marks', function () {
         return view('admin.exams.marks', [
             'academicSessions' => collect([
-                (object)['id' => 1, 'name' => '2025-2026', 'is_active' => true],
+                (object)['id' => 1, 'name' => '2025-2026', 'is_current' => true],
             ]),
             'classes' => collect([
                 (object)['id' => 1, 'name' => 'Class 1'],
@@ -546,7 +546,7 @@ Route::prefix('test-exams')->middleware(['auth'])->group(function () {
     Route::get('/report-card', function () {
         return view('admin.exams.report-card', [
             'academicSessions' => collect([
-                (object)['id' => 1, 'name' => '2025-2026', 'is_active' => true],
+                (object)['id' => 1, 'name' => '2025-2026', 'is_current' => true],
             ]),
             'classes' => collect([
                 (object)['id' => 1, 'name' => 'Class 1'],
@@ -566,7 +566,7 @@ Route::prefix('test-exams')->middleware(['auth'])->group(function () {
     Route::get('/statistics', function () {
         return view('admin.exams.statistics', [
             'academicSessions' => collect([
-                (object)['id' => 1, 'name' => '2025-2026', 'is_active' => true],
+                (object)['id' => 1, 'name' => '2025-2026', 'is_current' => true],
             ]),
             'classes' => collect([
                 (object)['id' => 1, 'name' => 'Class 1'],
@@ -587,7 +587,7 @@ Route::prefix('test-exams')->middleware(['auth'])->group(function () {
     Route::get('/rank-list', function () {
         return view('admin.exams.rank-list', [
             'academicSessions' => collect([
-                (object)['id' => 1, 'name' => '2025-2026', 'is_active' => true],
+                (object)['id' => 1, 'name' => '2025-2026', 'is_current' => true],
             ]),
             'classes' => collect([
                 (object)['id' => 1, 'name' => 'Class 1'],
@@ -677,7 +677,7 @@ Route::prefix('test-fees')->middleware(['auth'])->group(function () {
     Route::get('/masters', function () {
         return view('admin.fee-masters.index', [
             'academicSessions' => collect([
-                (object)['id' => 1, 'name' => '2025-2026', 'is_active' => true],
+                (object)['id' => 1, 'name' => '2025-2026', 'is_current' => true],
                 (object)['id' => 2, 'name' => '2024-2025', 'is_active' => false],
             ]),
             'classes' => collect([
@@ -767,7 +767,7 @@ Route::prefix('test-fees')->middleware(['auth'])->group(function () {
     Route::get('/masters/create', function () {
         return view('admin.fee-masters.create', [
             'academicSessions' => collect([
-                (object)['id' => 1, 'name' => '2025-2026', 'is_active' => true],
+                (object)['id' => 1, 'name' => '2025-2026', 'is_current' => true],
             ]),
             'classes' => collect([
                 (object)['id' => 1, 'name' => 'Class 1'],
@@ -783,6 +783,386 @@ Route::prefix('test-fees')->middleware(['auth'])->group(function () {
             ]),
         ]);
     })->name('test.fee-masters.create');
+
+    // Session 20 test routes - Fee Discounts
+    Route::get('/discounts', function () {
+        return view('admin.fee-discounts.index', [
+            'discounts' => collect([
+                (object)[
+                    'id' => 1,
+                    'name' => 'Sibling Discount',
+                    'code' => 'SIB',
+                    'discount_type' => 'percentage',
+                    'discount_value' => 10,
+                    'description' => 'Discount for siblings studying in the same school',
+                    'is_active' => true,
+                    'feeTypes' => collect([
+                        (object)['id' => 1, 'name' => 'Tuition Fee'],
+                        (object)['id' => 2, 'name' => 'Library Fee'],
+                    ]),
+                    'created_at' => now()->subDays(30),
+                ],
+                (object)[
+                    'id' => 2,
+                    'name' => 'Staff Child Discount',
+                    'code' => 'STF',
+                    'discount_type' => 'percentage',
+                    'discount_value' => 50,
+                    'description' => 'Discount for children of school staff',
+                    'is_active' => true,
+                    'feeTypes' => collect([
+                        (object)['id' => 1, 'name' => 'Tuition Fee'],
+                    ]),
+                    'created_at' => now()->subDays(25),
+                ],
+                (object)[
+                    'id' => 3,
+                    'name' => 'Merit Scholarship',
+                    'code' => 'MRT',
+                    'discount_type' => 'fixed',
+                    'discount_value' => 5000,
+                    'description' => 'Scholarship for meritorious students',
+                    'is_active' => true,
+                    'feeTypes' => collect([
+                        (object)['id' => 1, 'name' => 'Tuition Fee'],
+                    ]),
+                    'created_at' => now()->subDays(20),
+                ],
+            ]),
+        ]);
+    })->name('test.fee-discounts.index');
+
+    Route::get('/discounts/create', function () {
+        return view('admin.fee-discounts.create', [
+            'feeTypes' => collect([
+                (object)['id' => 1, 'name' => 'Tuition Fee', 'code' => 'TUI'],
+                (object)['id' => 2, 'name' => 'Library Fee', 'code' => 'LIB'],
+                (object)['id' => 3, 'name' => 'Transport Fee', 'code' => 'TRN'],
+            ]),
+        ]);
+    })->name('test.fee-discounts.create');
+
+    // Session 20 test routes - Fee Allotments
+    Route::get('/allotments', function () {
+        return view('admin.fee-allotments.index', [
+            'academicSessions' => collect([
+                (object)['id' => 1, 'name' => '2025-2026', 'is_current' => true],
+            ]),
+            'classes' => collect([
+                (object)['id' => 1, 'name' => 'Class 1'],
+                (object)['id' => 2, 'name' => 'Class 2'],
+            ]),
+            'feeTypes' => collect([
+                (object)['id' => 1, 'name' => 'Tuition Fee'],
+                (object)['id' => 2, 'name' => 'Library Fee'],
+            ]),
+            'allotments' => collect([
+                (object)[
+                    'id' => 1,
+                    'student' => (object)['id' => 1, 'name' => 'John Doe', 'admission_number' => 'ADM001', 'photo' => null],
+                    'class' => (object)['name' => 'Class 1'],
+                    'section' => (object)['name' => 'Section A'],
+                    'feeMaster' => (object)['feeType' => (object)['name' => 'Tuition Fee'], 'amount' => 5000],
+                    'discount' => (object)['name' => 'Sibling Discount', 'discount_type' => 'percentage', 'discount_value' => 10],
+                    'amount' => 5000,
+                    'discount_amount' => 500,
+                    'net_amount' => 4500,
+                    'paid_amount' => 4500,
+                    'due_amount' => 0,
+                    'payment_status' => 'paid',
+                    'due_date' => now()->subDays(5)->format('Y-m-d'),
+                ],
+                (object)[
+                    'id' => 2,
+                    'student' => (object)['id' => 2, 'name' => 'Jane Smith', 'admission_number' => 'ADM002', 'photo' => null],
+                    'class' => (object)['name' => 'Class 1'],
+                    'section' => (object)['name' => 'Section A'],
+                    'feeMaster' => (object)['feeType' => (object)['name' => 'Tuition Fee'], 'amount' => 5000],
+                    'discount' => null,
+                    'amount' => 5000,
+                    'discount_amount' => 0,
+                    'net_amount' => 5000,
+                    'paid_amount' => 2500,
+                    'due_amount' => 2500,
+                    'payment_status' => 'partial',
+                    'due_date' => now()->addDays(10)->format('Y-m-d'),
+                ],
+                (object)[
+                    'id' => 3,
+                    'student' => (object)['id' => 3, 'name' => 'Bob Wilson', 'admission_number' => 'ADM003', 'photo' => null],
+                    'class' => (object)['name' => 'Class 2'],
+                    'section' => (object)['name' => 'Section B'],
+                    'feeMaster' => (object)['feeType' => (object)['name' => 'Library Fee'], 'amount' => 1500],
+                    'discount' => null,
+                    'amount' => 1500,
+                    'discount_amount' => 0,
+                    'net_amount' => 1500,
+                    'paid_amount' => 0,
+                    'due_amount' => 1500,
+                    'payment_status' => 'unpaid',
+                    'due_date' => now()->subDays(10)->format('Y-m-d'),
+                ],
+            ]),
+        ]);
+    })->name('test.fee-allotments.index');
+
+    Route::get('/allotments/create', function () {
+        return view('admin.fee-allotments.create', [
+            'academicSessions' => collect([
+                (object)['id' => 1, 'name' => '2025-2026', 'is_current' => true],
+            ]),
+            'classes' => collect([
+                (object)['id' => 1, 'name' => 'Class 1'],
+                (object)['id' => 2, 'name' => 'Class 2'],
+            ]),
+            'feeMasters' => collect([
+                (object)['id' => 1, 'feeType' => (object)['name' => 'Tuition Fee'], 'amount' => 5000, 'due_date' => now()->addDays(15)->format('Y-m-d')],
+                (object)['id' => 2, 'feeType' => (object)['name' => 'Library Fee'], 'amount' => 1500, 'due_date' => now()->addDays(30)->format('Y-m-d')],
+            ]),
+            'discounts' => collect([
+                (object)['id' => 1, 'name' => 'Sibling Discount', 'discount_type' => 'percentage', 'discount_value' => 10],
+                (object)['id' => 2, 'name' => 'Staff Child Discount', 'discount_type' => 'percentage', 'discount_value' => 50],
+            ]),
+        ]);
+    })->name('test.fee-allotments.create');
+
+    // Session 20 test routes - Fee Collection
+    Route::get('/collect', function () {
+        return view('admin.fees.collect', [
+            'academicSessions' => collect([
+                (object)['id' => 1, 'name' => '2025-2026', 'is_current' => true],
+            ]),
+            'classes' => collect([
+                (object)['id' => 1, 'name' => 'Class 1'],
+                (object)['id' => 2, 'name' => 'Class 2'],
+            ]),
+            'paymentMethods' => ['cash', 'card', 'bank_transfer', 'cheque', 'online'],
+        ]);
+    })->name('test.fees.collect');
+
+    // Session 20 test routes - Fee Receipt
+    Route::get('/receipt', function () {
+        return view('admin.fees.receipt', [
+            'receipt' => (object)[
+                'receipt_number' => 'RCP-2026-0001',
+                'date' => now()->format('Y-m-d'),
+                'student' => (object)[
+                    'name' => 'John Doe',
+                    'admission_number' => 'ADM001',
+                    'roll_number' => '01',
+                    'class' => (object)['name' => 'Class 1'],
+                    'section' => (object)['name' => 'Section A'],
+                    'father_name' => 'Robert Doe',
+                    'phone' => '9876543210',
+                ],
+                'fees' => collect([
+                    (object)['fee_type' => 'Tuition Fee', 'amount' => 5000, 'discount' => 500, 'fine' => 0, 'net_amount' => 4500],
+                    (object)['fee_type' => 'Library Fee', 'amount' => 1500, 'discount' => 0, 'fine' => 100, 'net_amount' => 1600],
+                ]),
+                'total_amount' => 6500,
+                'total_discount' => 500,
+                'total_fine' => 100,
+                'net_amount' => 6100,
+                'payment_method' => 'cash',
+                'payment_reference' => null,
+                'collected_by' => 'Admin User',
+            ],
+            'school' => (object)[
+                'name' => 'Smart School',
+                'address' => '123 Education Street, Knowledge City',
+                'phone' => '1234567890',
+                'email' => 'info@smartschool.com',
+                'logo' => null,
+            ],
+        ]);
+    })->name('test.fees.receipt');
+
+    // Session 20 test routes - Fee Transactions
+    Route::get('/transactions', function () {
+        return view('admin.fee-transactions.index', [
+            'academicSessions' => collect([
+                (object)['id' => 1, 'name' => '2025-2026', 'is_current' => true],
+            ]),
+            'classes' => collect([
+                (object)['id' => 1, 'name' => 'Class 1'],
+                (object)['id' => 2, 'name' => 'Class 2'],
+            ]),
+            'feeTypes' => collect([
+                (object)['id' => 1, 'name' => 'Tuition Fee'],
+                (object)['id' => 2, 'name' => 'Library Fee'],
+            ]),
+            'transactions' => collect([
+                (object)[
+                    'id' => 1,
+                    'receipt_number' => 'RCP-2026-0001',
+                    'student' => (object)['name' => 'John Doe', 'admission_number' => 'ADM001'],
+                    'class' => (object)['name' => 'Class 1'],
+                    'section' => (object)['name' => 'Section A'],
+                    'feeType' => (object)['name' => 'Tuition Fee'],
+                    'amount' => 4500,
+                    'payment_method' => 'cash',
+                    'payment_status' => 'completed',
+                    'payment_date' => now()->subDays(2)->format('Y-m-d'),
+                    'collected_by' => (object)['name' => 'Admin User'],
+                ],
+                (object)[
+                    'id' => 2,
+                    'receipt_number' => 'RCP-2026-0002',
+                    'student' => (object)['name' => 'Jane Smith', 'admission_number' => 'ADM002'],
+                    'class' => (object)['name' => 'Class 1'],
+                    'section' => (object)['name' => 'Section A'],
+                    'feeType' => (object)['name' => 'Tuition Fee'],
+                    'amount' => 2500,
+                    'payment_method' => 'card',
+                    'payment_status' => 'completed',
+                    'payment_date' => now()->subDays(1)->format('Y-m-d'),
+                    'collected_by' => (object)['name' => 'Admin User'],
+                ],
+                (object)[
+                    'id' => 3,
+                    'receipt_number' => 'RCP-2026-0003',
+                    'student' => (object)['name' => 'Bob Wilson', 'admission_number' => 'ADM003'],
+                    'class' => (object)['name' => 'Class 2'],
+                    'section' => (object)['name' => 'Section B'],
+                    'feeType' => (object)['name' => 'Library Fee'],
+                    'amount' => 1500,
+                    'payment_method' => 'online',
+                    'payment_status' => 'pending',
+                    'payment_date' => now()->format('Y-m-d'),
+                    'collected_by' => (object)['name' => 'Admin User'],
+                ],
+            ]),
+            'statistics' => (object)[
+                'total_collected' => 125000,
+                'total_transactions' => 45,
+                'today_collection' => 8500,
+                'pending_amount' => 35000,
+            ],
+        ]);
+    })->name('test.fee-transactions.index');
+
+    // Session 20 test routes - Fee Reports
+    Route::get('/reports', function () {
+        return view('admin.fees.reports', [
+            'academicSessions' => collect([
+                (object)['id' => 1, 'name' => '2025-2026', 'is_current' => true],
+            ]),
+            'classes' => collect([
+                (object)['id' => 1, 'name' => 'Class 1'],
+                (object)['id' => 2, 'name' => 'Class 2'],
+            ]),
+            'statistics' => (object)[
+                'total_fees' => 500000,
+                'collected' => 350000,
+                'outstanding' => 150000,
+                'overdue' => 45000,
+            ],
+            'classWiseData' => collect([
+                (object)['class' => 'Class 1', 'total' => 200000, 'collected' => 150000, 'pending' => 50000, 'percentage' => 75],
+                (object)['class' => 'Class 2', 'total' => 180000, 'collected' => 120000, 'pending' => 60000, 'percentage' => 67],
+                (object)['class' => 'Class 3', 'total' => 120000, 'collected' => 80000, 'pending' => 40000, 'percentage' => 67],
+            ]),
+        ]);
+    })->name('test.fees.reports');
+
+    // Session 20 test routes - Fee Fines
+    Route::get('/fines', function () {
+        return view('admin.fee-fines.index', [
+            'academicSessions' => collect([
+                (object)['id' => 1, 'name' => '2025-2026', 'is_current' => true],
+            ]),
+            'classes' => collect([
+                (object)['id' => 1, 'name' => 'Class 1'],
+                (object)['id' => 2, 'name' => 'Class 2'],
+            ]),
+            'feeTypes' => collect([
+                (object)['id' => 1, 'name' => 'Tuition Fee'],
+                (object)['id' => 2, 'name' => 'Library Fee'],
+            ]),
+            'fineRules' => collect([
+                (object)[
+                    'id' => 1,
+                    'name' => 'Late Payment Fine',
+                    'feeType' => (object)['name' => 'Tuition Fee'],
+                    'fine_type' => 'daily',
+                    'fine_amount' => 50,
+                    'grace_period' => 7,
+                    'max_fine' => 1000,
+                    'is_active' => true,
+                ],
+                (object)[
+                    'id' => 2,
+                    'name' => 'Library Late Fine',
+                    'feeType' => (object)['name' => 'Library Fee'],
+                    'fine_type' => 'one_time',
+                    'fine_amount' => 200,
+                    'grace_period' => 5,
+                    'max_fine' => 200,
+                    'is_active' => true,
+                ],
+            ]),
+            'studentFines' => collect([
+                (object)[
+                    'id' => 1,
+                    'student' => (object)['name' => 'Bob Wilson', 'admission_number' => 'ADM003'],
+                    'class' => (object)['name' => 'Class 2'],
+                    'section' => (object)['name' => 'Section B'],
+                    'feeType' => (object)['name' => 'Tuition Fee'],
+                    'fine_amount' => 350,
+                    'days_overdue' => 7,
+                    'fine_status' => 'pending',
+                    'due_date' => now()->subDays(14)->format('Y-m-d'),
+                ],
+                (object)[
+                    'id' => 2,
+                    'student' => (object)['name' => 'Alice Brown', 'admission_number' => 'ADM004'],
+                    'class' => (object)['name' => 'Class 1'],
+                    'section' => (object)['name' => 'Section A'],
+                    'feeType' => (object)['name' => 'Library Fee'],
+                    'fine_amount' => 200,
+                    'days_overdue' => 10,
+                    'fine_status' => 'paid',
+                    'due_date' => now()->subDays(15)->format('Y-m-d'),
+                ],
+            ]),
+            'statistics' => (object)[
+                'total_rules' => 5,
+                'students_with_fines' => 12,
+                'total_fines' => 8500,
+                'collected_fines' => 3200,
+            ],
+        ]);
+    })->name('test.fee-fines.index');
+});
+
+// Named route aliases for Session 20 fee views (temporary - remove after backend is implemented)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/fee-discounts', fn() => redirect('/test-fees/discounts'))->name('fee-discounts.index');
+    Route::get('/fee-discounts/create', fn() => redirect('/test-fees/discounts/create'))->name('fee-discounts.create');
+    Route::post('/fee-discounts', fn() => back()->with('success', 'Discount created!'))->name('fee-discounts.store');
+    Route::get('/fee-discounts/{id}/edit', fn($id) => redirect('/test-fees/discounts'))->name('fee-discounts.edit');
+    Route::put('/fee-discounts/{id}', fn($id) => back()->with('success', 'Discount updated!'))->name('fee-discounts.update');
+    Route::delete('/fee-discounts/{id}', fn($id) => back()->with('success', 'Discount deleted!'))->name('fee-discounts.destroy');
+    
+    Route::get('/fee-allotments', fn() => redirect('/test-fees/allotments'))->name('fee-allotments.index');
+    Route::get('/fee-allotments/create', fn() => redirect('/test-fees/allotments/create'))->name('fee-allotments.create');
+    Route::post('/fee-allotments', fn() => back()->with('success', 'Allotment created!'))->name('fee-allotments.store');
+    Route::delete('/fee-allotments/{id}', fn($id) => back()->with('success', 'Allotment deleted!'))->name('fee-allotments.destroy');
+    
+        Route::get('/fees/collect', fn() => redirect('/test-fees/collect'))->name('fees.collect');
+        Route::post('/fees/collect', fn() => redirect('/test-fees/receipt')->with('success', 'Fee collected!'))->name('fees.collect.store');
+        Route::post('/fees/process-payment', fn() => redirect('/test-fees/receipt')->with('success', 'Payment processed!'))->name('fees.process-payment');
+        Route::get('/fees/receipt/{id?}', fn($id = null) => redirect('/test-fees/receipt'))->name('fees.receipt');
+    
+    Route::get('/fee-transactions', fn() => redirect('/test-fees/transactions'))->name('fee-transactions.index');
+    Route::get('/fee-transactions/{id}', fn($id) => redirect('/test-fees/transactions'))->name('fee-transactions.show');
+    
+    Route::get('/fees/reports', fn() => redirect('/test-fees/reports'))->name('fees.reports');
+    
+    Route::get('/fee-fines', fn() => redirect('/test-fees/fines'))->name('fee-fines.index');
+    Route::post('/fee-fines', fn() => back()->with('success', 'Fine rule created!'))->name('fee-fines.store');
+    Route::put('/fee-fines/{id}', fn($id) => back()->with('success', 'Fine rule updated!'))->name('fee-fines.update');
+    Route::delete('/fee-fines/{id}', fn($id) => back()->with('success', 'Fine rule deleted!'))->name('fee-fines.destroy');
 });
 
 require __DIR__.'/auth.php';
