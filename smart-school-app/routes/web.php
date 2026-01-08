@@ -1508,6 +1508,629 @@ Route::prefix('test-library')->group(function () {
     })->name('test.library.returns.create');
 });
 
+// Named route aliases for hostel views (temporary - remove after backend is implemented)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/hostels', fn() => redirect('/test-hostels/index'))->name('hostels.index');
+    Route::get('/hostels/create', fn() => redirect('/test-hostels/create'))->name('hostels.create');
+    Route::post('/hostels', fn() => back()->with('success', 'Hostel created!'))->name('hostels.store');
+    Route::get('/hostels/{id}', fn($id) => redirect('/test-hostels/index'))->name('hostels.show');
+    Route::get('/hostels/{id}/edit', fn($id) => redirect('/test-hostels/index'))->name('hostels.edit');
+    Route::put('/hostels/{id}', fn($id) => back()->with('success', 'Hostel updated!'))->name('hostels.update');
+    Route::delete('/hostels/{id}', fn($id) => back()->with('success', 'Hostel deleted!'))->name('hostels.destroy');
+    
+    Route::get('/hostels/room-types', fn() => redirect('/test-hostels/room-types'))->name('hostels.room-types.index');
+    Route::get('/hostels/room-types/create', fn() => redirect('/test-hostels/room-types/create'))->name('hostels.room-types.create');
+    Route::post('/hostels/room-types', fn() => back()->with('success', 'Room type created!'))->name('hostels.room-types.store');
+    Route::get('/hostels/room-types/{id}/edit', fn($id) => redirect('/test-hostels/room-types'))->name('hostels.room-types.edit');
+    Route::put('/hostels/room-types/{id}', fn($id) => back()->with('success', 'Room type updated!'))->name('hostels.room-types.update');
+    Route::delete('/hostels/room-types/{id}', fn($id) => back()->with('success', 'Room type deleted!'))->name('hostels.room-types.destroy');
+    
+    Route::get('/hostels/rooms', fn() => redirect('/test-hostels/rooms'))->name('hostels.rooms.index');
+    Route::get('/hostels/rooms/create', fn() => redirect('/test-hostels/rooms/create'))->name('hostels.rooms.create');
+    Route::post('/hostels/rooms', fn() => back()->with('success', 'Room created!'))->name('hostels.rooms.store');
+    Route::get('/hostels/rooms/{id}', fn($id) => redirect('/test-hostels/rooms/show'))->name('hostels.rooms.show');
+    Route::get('/hostels/rooms/{id}/edit', fn($id) => redirect('/test-hostels/rooms'))->name('hostels.rooms.edit');
+    Route::put('/hostels/rooms/{id}', fn($id) => back()->with('success', 'Room updated!'))->name('hostels.rooms.update');
+    Route::delete('/hostels/rooms/{id}', fn($id) => back()->with('success', 'Room deleted!'))->name('hostels.rooms.destroy');
+    
+    Route::get('/hostels/assign', fn() => redirect('/test-hostels/assign'))->name('hostels.assign');
+    Route::post('/hostels/assign', fn() => back()->with('success', 'Students assigned!'))->name('hostels.assign.store');
+    
+    Route::get('/hostels/students', fn() => redirect('/test-hostels/students'))->name('hostels.students.index');
+    Route::get('/hostels/students/{id}', fn($id) => redirect('/test-hostels/students'))->name('hostels.students.show');
+    Route::get('/hostels/students/{id}/edit', fn($id) => redirect('/test-hostels/students'))->name('hostels.students.edit');
+    Route::delete('/hostels/students/{id}', fn($id) => back()->with('success', 'Student removed!'))->name('hostels.students.destroy');
+    
+    Route::get('/hostels/report', fn() => redirect('/test-hostels/report'))->name('hostels.report');
+});
+
+// Temporary test routes for Session 23 hostel views (remove after testing)
+Route::prefix('test-hostels')->middleware(['auth'])->group(function () {
+    Route::get('/index', function () {
+        return view('admin.hostels.index', [
+            'hostels' => collect([
+                (object)[
+                    'id' => 1,
+                    'name' => 'Boys Hostel A',
+                    'code' => 'BHA',
+                    'type' => 'boys',
+                    'address' => '123 Campus Road',
+                    'city' => 'Springfield',
+                    'phone' => '555-0101',
+                    'email' => 'boyshostela@school.com',
+                    'warden_name' => 'Mr. John Smith',
+                    'warden_phone' => '555-0102',
+                    'facilities' => 'WiFi, Laundry, Common Room, Study Hall',
+                    'is_active' => true,
+                    'total_rooms' => 50,
+                    'total_capacity' => 150,
+                    'total_occupied' => 120,
+                    'created_at' => now()->subMonths(6),
+                ],
+                (object)[
+                    'id' => 2,
+                    'name' => 'Girls Hostel A',
+                    'code' => 'GHA',
+                    'type' => 'girls',
+                    'address' => '456 Campus Road',
+                    'city' => 'Springfield',
+                    'phone' => '555-0201',
+                    'email' => 'girlshostela@school.com',
+                    'warden_name' => 'Mrs. Jane Doe',
+                    'warden_phone' => '555-0202',
+                    'facilities' => 'WiFi, Laundry, Common Room, Gym',
+                    'is_active' => true,
+                    'total_rooms' => 40,
+                    'total_capacity' => 120,
+                    'total_occupied' => 100,
+                    'created_at' => now()->subMonths(6),
+                ],
+                (object)[
+                    'id' => 3,
+                    'name' => 'Mixed Hostel B',
+                    'code' => 'MHB',
+                    'type' => 'mixed',
+                    'address' => '789 Campus Road',
+                    'city' => 'Springfield',
+                    'phone' => '555-0301',
+                    'email' => 'mixedhostelb@school.com',
+                    'warden_name' => 'Dr. Robert Brown',
+                    'warden_phone' => '555-0302',
+                    'facilities' => 'WiFi, Cafeteria',
+                    'is_active' => false,
+                    'total_rooms' => 30,
+                    'total_capacity' => 90,
+                    'total_occupied' => 0,
+                    'created_at' => now()->subMonths(3),
+                ],
+            ]),
+        ]);
+    })->name('test.hostels.index');
+
+    Route::get('/create', function () {
+        return view('admin.hostels.create');
+    })->name('test.hostels.create');
+
+    Route::get('/room-types', function () {
+        return view('admin.hostels.room-types', [
+            'hostels' => collect([
+                (object)['id' => 1, 'name' => 'Boys Hostel A'],
+                (object)['id' => 2, 'name' => 'Girls Hostel A'],
+                (object)['id' => 3, 'name' => 'Mixed Hostel B'],
+            ]),
+            'roomTypes' => collect([
+                (object)[
+                    'id' => 1,
+                    'hostel_id' => 1,
+                    'hostel' => (object)['id' => 1, 'name' => 'Boys Hostel A'],
+                    'name' => 'Single Room',
+                    'capacity' => 50,
+                    'beds_per_room' => 1,
+                    'fees_per_month' => 500.00,
+                    'facilities' => 'AC, Attached Bathroom, Study Table',
+                    'is_active' => true,
+                    'rooms_count' => 20,
+                    'students_count' => 18,
+                ],
+                (object)[
+                    'id' => 2,
+                    'hostel_id' => 1,
+                    'hostel' => (object)['id' => 1, 'name' => 'Boys Hostel A'],
+                    'name' => 'Double Room',
+                    'capacity' => 60,
+                    'beds_per_room' => 2,
+                    'fees_per_month' => 350.00,
+                    'facilities' => 'Fan, Shared Bathroom, Study Table',
+                    'is_active' => true,
+                    'rooms_count' => 30,
+                    'students_count' => 52,
+                ],
+                (object)[
+                    'id' => 3,
+                    'hostel_id' => 2,
+                    'hostel' => (object)['id' => 2, 'name' => 'Girls Hostel A'],
+                    'name' => 'Triple Room',
+                    'capacity' => 90,
+                    'beds_per_room' => 3,
+                    'fees_per_month' => 250.00,
+                    'facilities' => 'Fan, Shared Bathroom',
+                    'is_active' => true,
+                    'rooms_count' => 30,
+                    'students_count' => 75,
+                ],
+                (object)[
+                    'id' => 4,
+                    'hostel_id' => 2,
+                    'hostel' => (object)['id' => 2, 'name' => 'Girls Hostel A'],
+                    'name' => 'Dormitory',
+                    'capacity' => 30,
+                    'beds_per_room' => 6,
+                    'fees_per_month' => 150.00,
+                    'facilities' => 'Fan, Common Bathroom',
+                    'is_active' => false,
+                    'rooms_count' => 5,
+                    'students_count' => 0,
+                ],
+            ]),
+        ]);
+    })->name('test.hostels.room-types');
+
+    Route::get('/room-types/create', function () {
+        return view('admin.hostels.room-types-create', [
+            'hostels' => collect([
+                (object)['id' => 1, 'name' => 'Boys Hostel A', 'type' => 'boys'],
+                (object)['id' => 2, 'name' => 'Girls Hostel A', 'type' => 'girls'],
+                (object)['id' => 3, 'name' => 'Mixed Hostel B', 'type' => 'mixed'],
+            ]),
+        ]);
+    })->name('test.hostels.room-types.create');
+
+    Route::get('/rooms', function () {
+        return view('admin.hostels.rooms', [
+            'hostels' => collect([
+                (object)['id' => 1, 'name' => 'Boys Hostel A'],
+                (object)['id' => 2, 'name' => 'Girls Hostel A'],
+            ]),
+            'roomTypes' => collect([
+                (object)['id' => 1, 'name' => 'Single Room', 'hostel_id' => 1],
+                (object)['id' => 2, 'name' => 'Double Room', 'hostel_id' => 1],
+                (object)['id' => 3, 'name' => 'Triple Room', 'hostel_id' => 2],
+            ]),
+            'rooms' => collect([
+                (object)[
+                    'id' => 1,
+                    'hostel_id' => 1,
+                    'room_type_id' => 1,
+                    'hostel' => (object)['id' => 1, 'name' => 'Boys Hostel A'],
+                    'roomType' => (object)['id' => 1, 'name' => 'Single Room'],
+                    'room_number' => '101',
+                    'floor_number' => 1,
+                    'capacity' => 1,
+                    'occupied' => 1,
+                    'is_active' => true,
+                ],
+                (object)[
+                    'id' => 2,
+                    'hostel_id' => 1,
+                    'room_type_id' => 1,
+                    'hostel' => (object)['id' => 1, 'name' => 'Boys Hostel A'],
+                    'roomType' => (object)['id' => 1, 'name' => 'Single Room'],
+                    'room_number' => '102',
+                    'floor_number' => 1,
+                    'capacity' => 1,
+                    'occupied' => 0,
+                    'is_active' => true,
+                ],
+                (object)[
+                    'id' => 3,
+                    'hostel_id' => 1,
+                    'room_type_id' => 2,
+                    'hostel' => (object)['id' => 1, 'name' => 'Boys Hostel A'],
+                    'roomType' => (object)['id' => 2, 'name' => 'Double Room'],
+                    'room_number' => '201',
+                    'floor_number' => 2,
+                    'capacity' => 2,
+                    'occupied' => 2,
+                    'is_active' => true,
+                ],
+                (object)[
+                    'id' => 4,
+                    'hostel_id' => 2,
+                    'room_type_id' => 3,
+                    'hostel' => (object)['id' => 2, 'name' => 'Girls Hostel A'],
+                    'roomType' => (object)['id' => 3, 'name' => 'Triple Room'],
+                    'room_number' => 'G-101',
+                    'floor_number' => 1,
+                    'capacity' => 3,
+                    'occupied' => 2,
+                    'is_active' => true,
+                ],
+                (object)[
+                    'id' => 5,
+                    'hostel_id' => 2,
+                    'room_type_id' => 3,
+                    'hostel' => (object)['id' => 2, 'name' => 'Girls Hostel A'],
+                    'roomType' => (object)['id' => 3, 'name' => 'Triple Room'],
+                    'room_number' => 'G-102',
+                    'floor_number' => 1,
+                    'capacity' => 3,
+                    'occupied' => 0,
+                    'is_active' => false,
+                ],
+            ]),
+        ]);
+    })->name('test.hostels.rooms');
+
+    Route::get('/rooms/create', function () {
+        return view('admin.hostels.rooms-create', [
+            'hostels' => collect([
+                (object)['id' => 1, 'name' => 'Boys Hostel A', 'type' => 'boys'],
+                (object)['id' => 2, 'name' => 'Girls Hostel A', 'type' => 'girls'],
+            ]),
+            'roomTypes' => collect([
+                (object)['id' => 1, 'name' => 'Single Room', 'hostel_id' => 1, 'beds_per_room' => 1],
+                (object)['id' => 2, 'name' => 'Double Room', 'hostel_id' => 1, 'beds_per_room' => 2],
+                (object)['id' => 3, 'name' => 'Triple Room', 'hostel_id' => 2, 'beds_per_room' => 3],
+            ]),
+        ]);
+    })->name('test.hostels.rooms.create');
+
+    Route::get('/rooms/show', function () {
+        return view('admin.hostels.rooms-show', [
+            'room' => (object)[
+                'id' => 1,
+                'hostel_id' => 1,
+                'room_type_id' => 2,
+                'hostel' => (object)[
+                    'id' => 1,
+                    'name' => 'Boys Hostel A',
+                    'type' => 'boys',
+                    'warden_name' => 'Mr. John Smith',
+                    'phone' => '555-0101',
+                ],
+                'roomType' => (object)[
+                    'id' => 2,
+                    'name' => 'Double Room',
+                    'fees_per_month' => 350.00,
+                ],
+                'room_number' => '201',
+                'floor_number' => 2,
+                'capacity' => 2,
+                'occupied' => 2,
+                'is_active' => true,
+            ],
+            'currentOccupants' => collect([
+                (object)[
+                    'id' => 1,
+                    'student_id' => 1,
+                    'student' => (object)[
+                        'id' => 1,
+                        'first_name' => 'John',
+                        'last_name' => 'Doe',
+                        'admission_number' => 'ADM001',
+                        'photo' => null,
+                        'class' => (object)['name' => 'Class 10'],
+                        'section' => (object)['name' => 'A'],
+                    ],
+                    'admission_date' => now()->subMonths(3)->format('Y-m-d'),
+                    'hostel_fees' => 350.00,
+                    'is_active' => true,
+                ],
+                (object)[
+                    'id' => 2,
+                    'student_id' => 2,
+                    'student' => (object)[
+                        'id' => 2,
+                        'first_name' => 'Mike',
+                        'last_name' => 'Johnson',
+                        'admission_number' => 'ADM002',
+                        'photo' => null,
+                        'class' => (object)['name' => 'Class 10'],
+                        'section' => (object)['name' => 'B'],
+                    ],
+                    'admission_date' => now()->subMonths(2)->format('Y-m-d'),
+                    'hostel_fees' => 350.00,
+                    'is_active' => true,
+                ],
+            ]),
+            'roomHistory' => collect([
+                (object)[
+                    'id' => 10,
+                    'student' => (object)[
+                        'first_name' => 'Tom',
+                        'last_name' => 'Wilson',
+                        'admission_number' => 'ADM010',
+                    ],
+                    'admission_date' => now()->subYear()->format('Y-m-d'),
+                    'leaving_date' => now()->subMonths(4)->format('Y-m-d'),
+                    'hostel_fees' => 2800.00,
+                ],
+            ]),
+        ]);
+    })->name('test.hostels.rooms.show');
+
+    Route::get('/assign', function () {
+        return view('admin.hostels.assign', [
+            'academicSessions' => collect([
+                (object)['id' => 1, 'name' => '2025-2026'],
+                (object)['id' => 2, 'name' => '2024-2025'],
+            ]),
+            'classes' => collect([
+                (object)['id' => 1, 'name' => 'Class 9'],
+                (object)['id' => 2, 'name' => 'Class 10'],
+                (object)['id' => 3, 'name' => 'Class 11'],
+            ]),
+            'sections' => collect([
+                (object)['id' => 1, 'name' => 'Section A', 'class_id' => 1],
+                (object)['id' => 2, 'name' => 'Section B', 'class_id' => 1],
+                (object)['id' => 3, 'name' => 'Section A', 'class_id' => 2],
+                (object)['id' => 4, 'name' => 'Section B', 'class_id' => 2],
+            ]),
+            'hostels' => collect([
+                (object)['id' => 1, 'name' => 'Boys Hostel A'],
+                (object)['id' => 2, 'name' => 'Girls Hostel A'],
+            ]),
+            'roomTypes' => collect([
+                (object)['id' => 1, 'name' => 'Single Room', 'hostel_id' => 1, 'fees_per_month' => 500],
+                (object)['id' => 2, 'name' => 'Double Room', 'hostel_id' => 1, 'fees_per_month' => 350],
+                (object)['id' => 3, 'name' => 'Triple Room', 'hostel_id' => 2, 'fees_per_month' => 250],
+            ]),
+            'rooms' => collect([
+                (object)['id' => 1, 'room_number' => '101', 'room_type_id' => 1, 'capacity' => 1, 'occupied' => 0],
+                (object)['id' => 2, 'room_number' => '102', 'room_type_id' => 1, 'capacity' => 1, 'occupied' => 0],
+                (object)['id' => 3, 'room_number' => '201', 'room_type_id' => 2, 'capacity' => 2, 'occupied' => 1],
+                (object)['id' => 4, 'room_number' => 'G-101', 'room_type_id' => 3, 'capacity' => 3, 'occupied' => 1],
+            ]),
+            'students' => collect([
+                (object)[
+                    'id' => 1,
+                    'first_name' => 'Alice',
+                    'last_name' => 'Brown',
+                    'admission_number' => 'ADM003',
+                    'photo' => null,
+                    'class_id' => 2,
+                    'class' => (object)['name' => 'Class 10'],
+                    'section' => (object)['name' => 'A'],
+                    'hostelAssignment' => null,
+                ],
+                (object)[
+                    'id' => 2,
+                    'first_name' => 'Bob',
+                    'last_name' => 'Davis',
+                    'admission_number' => 'ADM004',
+                    'photo' => null,
+                    'class_id' => 2,
+                    'class' => (object)['name' => 'Class 10'],
+                    'section' => (object)['name' => 'A'],
+                    'hostelAssignment' => (object)[
+                        'hostel' => (object)['name' => 'Boys Hostel A'],
+                        'room' => (object)['room_number' => '201'],
+                    ],
+                ],
+                (object)[
+                    'id' => 3,
+                    'first_name' => 'Carol',
+                    'last_name' => 'Evans',
+                    'admission_number' => 'ADM005',
+                    'photo' => null,
+                    'class_id' => 2,
+                    'class' => (object)['name' => 'Class 10'],
+                    'section' => (object)['name' => 'B'],
+                    'hostelAssignment' => null,
+                ],
+            ]),
+        ]);
+    })->name('test.hostels.assign');
+
+    Route::get('/students', function () {
+        return view('admin.hostels.students', [
+            'hostels' => collect([
+                (object)['id' => 1, 'name' => 'Boys Hostel A'],
+                (object)['id' => 2, 'name' => 'Girls Hostel A'],
+            ]),
+            'rooms' => collect([
+                (object)['id' => 1, 'room_number' => '101', 'hostel_id' => 1],
+                (object)['id' => 2, 'room_number' => '102', 'hostel_id' => 1],
+                (object)['id' => 3, 'room_number' => '201', 'hostel_id' => 1],
+                (object)['id' => 4, 'room_number' => 'G-101', 'hostel_id' => 2],
+            ]),
+            'classes' => collect([
+                (object)['id' => 1, 'name' => 'Class 9'],
+                (object)['id' => 2, 'name' => 'Class 10'],
+            ]),
+            'assignments' => collect([
+                (object)[
+                    'id' => 1,
+                    'student_id' => 1,
+                    'hostel_id' => 1,
+                    'room_id' => 1,
+                    'student' => (object)[
+                        'id' => 1,
+                        'first_name' => 'John',
+                        'last_name' => 'Doe',
+                        'admission_number' => 'ADM001',
+                        'photo' => null,
+                        'class_id' => 2,
+                        'class' => (object)['name' => 'Class 10'],
+                        'section' => (object)['name' => 'A'],
+                    ],
+                    'hostel' => (object)['id' => 1, 'name' => 'Boys Hostel A'],
+                    'room' => (object)[
+                        'id' => 1,
+                        'room_number' => '101',
+                        'roomType' => (object)['name' => 'Single Room'],
+                    ],
+                    'admission_date' => now()->subMonths(3)->format('Y-m-d'),
+                    'hostel_fees' => 500.00,
+                    'is_active' => true,
+                ],
+                (object)[
+                    'id' => 2,
+                    'student_id' => 2,
+                    'hostel_id' => 1,
+                    'room_id' => 3,
+                    'student' => (object)[
+                        'id' => 2,
+                        'first_name' => 'Mike',
+                        'last_name' => 'Johnson',
+                        'admission_number' => 'ADM002',
+                        'photo' => null,
+                        'class_id' => 2,
+                        'class' => (object)['name' => 'Class 10'],
+                        'section' => (object)['name' => 'B'],
+                    ],
+                    'hostel' => (object)['id' => 1, 'name' => 'Boys Hostel A'],
+                    'room' => (object)[
+                        'id' => 3,
+                        'room_number' => '201',
+                        'roomType' => (object)['name' => 'Double Room'],
+                    ],
+                    'admission_date' => now()->subMonths(2)->format('Y-m-d'),
+                    'hostel_fees' => 350.00,
+                    'is_active' => true,
+                ],
+                (object)[
+                    'id' => 3,
+                    'student_id' => 3,
+                    'hostel_id' => 2,
+                    'room_id' => 4,
+                    'student' => (object)[
+                        'id' => 3,
+                        'first_name' => 'Sarah',
+                        'last_name' => 'Williams',
+                        'admission_number' => 'ADM006',
+                        'photo' => null,
+                        'class_id' => 1,
+                        'class' => (object)['name' => 'Class 9'],
+                        'section' => (object)['name' => 'A'],
+                    ],
+                    'hostel' => (object)['id' => 2, 'name' => 'Girls Hostel A'],
+                    'room' => (object)[
+                        'id' => 4,
+                        'room_number' => 'G-101',
+                        'roomType' => (object)['name' => 'Triple Room'],
+                    ],
+                    'admission_date' => now()->subMonths(1)->format('Y-m-d'),
+                    'hostel_fees' => 250.00,
+                    'is_active' => true,
+                ],
+                (object)[
+                    'id' => 4,
+                    'student_id' => 4,
+                    'hostel_id' => 1,
+                    'room_id' => 2,
+                    'student' => (object)[
+                        'id' => 4,
+                        'first_name' => 'David',
+                        'last_name' => 'Lee',
+                        'admission_number' => 'ADM007',
+                        'photo' => null,
+                        'class_id' => 1,
+                        'class' => (object)['name' => 'Class 9'],
+                        'section' => (object)['name' => 'B'],
+                    ],
+                    'hostel' => (object)['id' => 1, 'name' => 'Boys Hostel A'],
+                    'room' => (object)[
+                        'id' => 2,
+                        'room_number' => '102',
+                        'roomType' => (object)['name' => 'Single Room'],
+                    ],
+                    'admission_date' => now()->subWeeks(2)->format('Y-m-d'),
+                    'hostel_fees' => 500.00,
+                    'is_active' => false,
+                ],
+            ]),
+        ]);
+    })->name('test.hostels.students');
+
+    Route::get('/report', function () {
+        return view('admin.hostels.report', [
+            'academicSessions' => collect([
+                (object)['id' => 1, 'name' => '2025-2026'],
+                (object)['id' => 2, 'name' => '2024-2025'],
+            ]),
+            'hostels' => collect([
+                (object)['id' => 1, 'name' => 'Boys Hostel A'],
+                (object)['id' => 2, 'name' => 'Girls Hostel A'],
+            ]),
+            'stats' => [
+                'total_hostels' => 3,
+                'total_rooms' => 120,
+                'total_students' => 220,
+                'total_fees' => 77000.00,
+                'total_capacity' => 360,
+                'total_occupied' => 220,
+                'available_beds' => 140,
+                'boys_hostels' => 1,
+                'girls_hostels' => 1,
+            ],
+            'hostelSummary' => collect([
+                (object)[
+                    'id' => 1,
+                    'name' => 'Boys Hostel A',
+                    'type' => 'boys',
+                    'rooms_count' => 50,
+                    'total_capacity' => 150,
+                    'total_occupied' => 120,
+                    'total_fees' => 42000.00,
+                ],
+                (object)[
+                    'id' => 2,
+                    'name' => 'Girls Hostel A',
+                    'type' => 'girls',
+                    'rooms_count' => 40,
+                    'total_capacity' => 120,
+                    'total_occupied' => 100,
+                    'total_fees' => 35000.00,
+                ],
+                (object)[
+                    'id' => 3,
+                    'name' => 'Mixed Hostel B',
+                    'type' => 'mixed',
+                    'rooms_count' => 30,
+                    'total_capacity' => 90,
+                    'total_occupied' => 0,
+                    'total_fees' => 0.00,
+                ],
+            ]),
+            'roomTypeSummary' => collect([
+                (object)[
+                    'id' => 1,
+                    'name' => 'Single Room',
+                    'hostel' => (object)['name' => 'Boys Hostel A'],
+                    'rooms_count' => 20,
+                    'beds_per_room' => 1,
+                    'capacity' => 20,
+                    'students_count' => 18,
+                    'fees_per_month' => 500.00,
+                ],
+                (object)[
+                    'id' => 2,
+                    'name' => 'Double Room',
+                    'hostel' => (object)['name' => 'Boys Hostel A'],
+                    'rooms_count' => 30,
+                    'beds_per_room' => 2,
+                    'capacity' => 60,
+                    'students_count' => 52,
+                    'fees_per_month' => 350.00,
+                ],
+                (object)[
+                    'id' => 3,
+                    'name' => 'Triple Room',
+                    'hostel' => (object)['name' => 'Girls Hostel A'],
+                    'rooms_count' => 30,
+                    'beds_per_room' => 3,
+                    'capacity' => 90,
+                    'students_count' => 75,
+                    'fees_per_month' => 250.00,
+                ],
+            ]),
+            'monthlyAdmissions' => [5, 8, 12, 15, 20, 25, 30, 45, 35, 15, 8, 2],
+            'monthlyDepartures' => [2, 3, 5, 4, 6, 8, 10, 5, 8, 4, 3, 2],
+        ]);
+    })->name('test.hostels.report');
+});
+
 // Named route aliases for transport views (temporary - remove after backend is implemented)
 Route::middleware(['auth'])->group(function () {
     Route::get('/transport/routes', fn() => redirect('/test-transport/routes'))->name('transport.routes.index');
