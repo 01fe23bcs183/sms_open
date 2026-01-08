@@ -3100,4 +3100,537 @@ Route::prefix('test-communication')->middleware(['auth'])->group(function () {
     })->name('test.sms.send');
 });
 
+// Named route aliases for Session 25 views (temporary - remove after backend is implemented)
+Route::middleware(['auth'])->group(function () {
+    // Email routes
+    Route::get('/email/logs', fn() => redirect('/test-email/logs'))->name('email.logs');
+    Route::get('/email/send', fn() => redirect('/test-email/send'))->name('email.send');
+    Route::post('/email/send', fn() => back()->with('success', 'Email sent successfully!'))->name('email.store');
+    Route::get('/email/{id}', fn($id) => redirect('/test-email/logs'))->name('email.show');
+    Route::post('/email/{id}/retry', fn($id) => back()->with('success', 'Email retry queued!'))->name('email.retry');
+    Route::get('/email/export', fn() => response()->download(storage_path('app/email-logs.csv')))->name('email.export');
+    
+    // Downloads routes
+    Route::get('/downloads', fn() => redirect('/test-downloads/index'))->name('downloads.index');
+    Route::get('/downloads/create', fn() => redirect('/test-downloads/create'))->name('downloads.create');
+    Route::post('/downloads', fn() => back()->with('success', 'Download created!'))->name('downloads.store');
+    Route::get('/downloads/{id}/edit', fn($id) => redirect('/test-downloads/create'))->name('downloads.edit');
+    Route::put('/downloads/{id}', fn($id) => back()->with('success', 'Download updated!'))->name('downloads.update');
+    Route::delete('/downloads/{id}', fn($id) => back()->with('success', 'Download deleted!'))->name('downloads.destroy');
+    Route::get('/downloads/{id}/download', fn($id) => back())->name('downloads.download');
+    Route::delete('/downloads/bulk-delete', fn() => back()->with('success', 'Downloads deleted!'))->name('downloads.bulk-delete');
+    Route::get('/downloads/export', fn() => back())->name('downloads.export');
+    
+    // Expense Categories routes
+    Route::get('/expense-categories', fn() => redirect('/test-expenses/categories'))->name('expense-categories.index');
+    Route::get('/expense-categories/create', fn() => redirect('/test-expenses/categories/create'))->name('expense-categories.create');
+    Route::post('/expense-categories', fn() => back()->with('success', 'Category created!'))->name('expense-categories.store');
+    Route::get('/expense-categories/{id}/edit', fn($id) => redirect('/test-expenses/categories/create'))->name('expense-categories.edit');
+    Route::put('/expense-categories/{id}', fn($id) => back()->with('success', 'Category updated!'))->name('expense-categories.update');
+    Route::delete('/expense-categories/{id}', fn($id) => back()->with('success', 'Category deleted!'))->name('expense-categories.destroy');
+    Route::patch('/expense-categories/{id}/toggle-status', fn($id) => back()->with('success', 'Status updated!'))->name('expense-categories.toggle-status');
+    
+    // Expenses routes
+    Route::get('/expenses', fn() => redirect('/test-expenses/index'))->name('expenses.index');
+    Route::get('/expenses/create', fn() => redirect('/test-expenses/create'))->name('expenses.create');
+    Route::post('/expenses', fn() => back()->with('success', 'Expense created!'))->name('expenses.store');
+    Route::get('/expenses/{id}/edit', fn($id) => redirect('/test-expenses/create'))->name('expenses.edit');
+    Route::put('/expenses/{id}', fn($id) => back()->with('success', 'Expense updated!'))->name('expenses.update');
+    Route::delete('/expenses/{id}', fn($id) => back()->with('success', 'Expense deleted!'))->name('expenses.destroy');
+    Route::delete('/expenses/bulk-delete', fn() => back()->with('success', 'Expenses deleted!'))->name('expenses.bulk-delete');
+    Route::get('/expenses/export', fn() => back())->name('expenses.export');
+    
+    // Income Categories routes
+    Route::get('/income-categories', fn() => redirect('/test-income/categories'))->name('income-categories.index');
+    Route::get('/income-categories/create', fn() => redirect('/test-income/categories/create'))->name('income-categories.create');
+    Route::post('/income-categories', fn() => back()->with('success', 'Category created!'))->name('income-categories.store');
+    Route::get('/income-categories/{id}/edit', fn($id) => redirect('/test-income/categories/create'))->name('income-categories.edit');
+    Route::put('/income-categories/{id}', fn($id) => back()->with('success', 'Category updated!'))->name('income-categories.update');
+    Route::delete('/income-categories/{id}', fn($id) => back()->with('success', 'Category deleted!'))->name('income-categories.destroy');
+    Route::patch('/income-categories/{id}/toggle-status', fn($id) => back()->with('success', 'Status updated!'))->name('income-categories.toggle-status');
+    
+    // Income routes (placeholder for future)
+    Route::get('/income', fn() => redirect('/test-income/index'))->name('income.index');
+});
+
+// Temporary test routes for Session 25 views (remove after testing)
+Route::prefix('test-email')->middleware(['auth'])->group(function () {
+    // Email Logs
+    Route::get('/logs', function () {
+        $logs = collect([
+            (object)[
+                'id' => 1,
+                'to_email' => 'parent1@example.com',
+                'to_name' => 'John Parent',
+                'subject' => 'Fee Payment Reminder',
+                'body' => 'Dear Parent, This is a reminder that your child\'s fee payment is due by January 31, 2026. Please ensure timely payment to avoid late fees.',
+                'type' => 'fee',
+                'status' => 'sent',
+                'sent_at' => now()->subHours(2),
+                'created_at' => now()->subHours(3),
+                'attachments' => [],
+            ],
+            (object)[
+                'id' => 2,
+                'to_email' => 'parent2@example.com',
+                'to_name' => 'Sarah Parent',
+                'subject' => 'Exam Schedule Notification',
+                'body' => 'Dear Parent, Please find attached the exam schedule for the upcoming mid-term examinations starting February 15, 2026.',
+                'type' => 'exam',
+                'status' => 'sent',
+                'sent_at' => now()->subHours(5),
+                'created_at' => now()->subHours(6),
+                'attachments' => ['exam_schedule.pdf'],
+            ],
+            (object)[
+                'id' => 3,
+                'to_email' => 'parent3@example.com',
+                'to_name' => 'Mike Parent',
+                'subject' => 'Attendance Alert',
+                'body' => 'Dear Parent, Your child was marked absent today. Please contact the school if this is incorrect.',
+                'type' => 'attendance',
+                'status' => 'pending',
+                'sent_at' => null,
+                'created_at' => now()->subMinutes(30),
+                'attachments' => [],
+            ],
+            (object)[
+                'id' => 4,
+                'to_email' => 'invalid@email',
+                'to_name' => 'Lisa Parent',
+                'subject' => 'School Holiday Notice',
+                'body' => 'Dear Parent, School will remain closed on January 26, 2026 for Republic Day.',
+                'type' => 'notice',
+                'status' => 'failed',
+                'sent_at' => null,
+                'error_message' => 'Invalid email address',
+                'created_at' => now()->subDays(1),
+                'attachments' => [],
+            ],
+        ]);
+        
+        $stats = [
+            'total' => 250,
+            'sent' => 230,
+            'pending' => 10,
+            'failed' => 10,
+        ];
+        
+        return view('admin.email.logs', compact('logs', 'stats'));
+    })->name('test.email.logs');
+
+    // Email Send
+    Route::get('/send', function () {
+        $classes = collect([
+            (object)['id' => 1, 'name' => 'Class 1', 'students_count' => 30],
+            (object)['id' => 2, 'name' => 'Class 2', 'students_count' => 28],
+            (object)['id' => 3, 'name' => 'Class 3', 'students_count' => 32],
+            (object)['id' => 4, 'name' => 'Class 4', 'students_count' => 25],
+            (object)['id' => 5, 'name' => 'Class 5', 'students_count' => 27],
+        ]);
+        
+        $roleCounts = [
+            'admin' => 5,
+            'teacher' => 25,
+            'student' => 200,
+            'parent' => 180,
+            'accountant' => 3,
+            'librarian' => 2,
+        ];
+        
+        $templates = collect([
+            (object)['id' => 1, 'name' => 'Fee Reminder', 'subject' => 'Fee Payment Reminder', 'body' => 'Dear {name}, This is a reminder that your fee payment is due by {date}. Please ensure timely payment.'],
+            (object)['id' => 2, 'name' => 'Exam Schedule', 'subject' => 'Exam Schedule Notification', 'body' => 'Dear {name}, Please find the exam schedule for {exam_name} starting from {date}.'],
+            (object)['id' => 3, 'name' => 'Attendance Alert', 'subject' => 'Attendance Alert', 'body' => 'Dear {name}, Your child was marked {status} on {date}.'],
+            (object)['id' => 4, 'name' => 'Holiday Notice', 'subject' => 'School Holiday Notice', 'body' => 'Dear {name}, School will remain closed on {date} for {reason}.'],
+        ]);
+        
+        return view('admin.email.send', compact('classes', 'roleCounts', 'templates'));
+    })->name('test.email.send');
+});
+
+// Temporary test routes for Downloads views (remove after testing)
+Route::prefix('test-downloads')->middleware(['auth'])->group(function () {
+    // Downloads List
+    Route::get('/index', function () {
+        $downloads = collect([
+            (object)[
+                'id' => 1,
+                'title' => 'Student Handbook 2025-26',
+                'description' => 'Complete student handbook with rules, regulations, and guidelines',
+                'file_path' => 'downloads/student_handbook.pdf',
+                'file_size' => '2.5 MB',
+                'file_type' => 'pdf',
+                'category_id' => 1,
+                'category' => (object)['name' => 'Handbooks'],
+                'target_roles' => ['student', 'parent'],
+                'status' => 'active',
+                'views' => 150,
+                'download_count' => 89,
+                'created_at' => now()->subDays(30),
+            ],
+            (object)[
+                'id' => 2,
+                'title' => 'Fee Structure 2025-26',
+                'description' => 'Detailed fee structure for all classes',
+                'file_path' => 'downloads/fee_structure.xlsx',
+                'file_size' => '156 KB',
+                'file_type' => 'xlsx',
+                'category_id' => 2,
+                'category' => (object)['name' => 'Fee Documents'],
+                'target_roles' => ['parent', 'accountant'],
+                'status' => 'active',
+                'views' => 200,
+                'download_count' => 175,
+                'created_at' => now()->subDays(25),
+            ],
+            (object)[
+                'id' => 3,
+                'title' => 'Exam Timetable - Mid Term',
+                'description' => 'Mid-term examination timetable for all classes',
+                'file_path' => 'downloads/exam_timetable.pdf',
+                'file_size' => '450 KB',
+                'file_type' => 'pdf',
+                'category_id' => 3,
+                'category' => (object)['name' => 'Exam Documents'],
+                'target_roles' => ['student', 'parent', 'teacher'],
+                'status' => 'active',
+                'views' => 320,
+                'download_count' => 280,
+                'created_at' => now()->subDays(10),
+            ],
+            (object)[
+                'id' => 4,
+                'title' => 'Holiday Calendar 2026',
+                'description' => 'List of holidays for the academic year 2025-26',
+                'file_path' => 'downloads/holiday_calendar.pdf',
+                'file_size' => '120 KB',
+                'file_type' => 'pdf',
+                'category_id' => 4,
+                'category' => (object)['name' => 'Calendars'],
+                'target_roles' => [],
+                'status' => 'active',
+                'views' => 450,
+                'download_count' => 390,
+                'created_at' => now()->subDays(60),
+            ],
+        ]);
+        
+        $categories = collect([
+            (object)['id' => 1, 'name' => 'Handbooks'],
+            (object)['id' => 2, 'name' => 'Fee Documents'],
+            (object)['id' => 3, 'name' => 'Exam Documents'],
+            (object)['id' => 4, 'name' => 'Calendars'],
+        ]);
+        
+        $stats = [
+            'total' => 15,
+            'active' => 12,
+            'total_views' => 1500,
+            'total_downloads' => 1200,
+        ];
+        
+        return view('admin.downloads.index', compact('downloads', 'categories', 'stats'));
+    })->name('test.downloads.index');
+
+    // Downloads Create
+    Route::get('/create', function () {
+        $categories = collect([
+            (object)['id' => 1, 'name' => 'Handbooks'],
+            (object)['id' => 2, 'name' => 'Fee Documents'],
+            (object)['id' => 3, 'name' => 'Exam Documents'],
+            (object)['id' => 4, 'name' => 'Calendars'],
+            (object)['id' => 5, 'name' => 'Forms'],
+        ]);
+        
+        $classes = collect([
+            (object)['id' => 1, 'name' => 'Class 1'],
+            (object)['id' => 2, 'name' => 'Class 2'],
+            (object)['id' => 3, 'name' => 'Class 3'],
+            (object)['id' => 4, 'name' => 'Class 4'],
+            (object)['id' => 5, 'name' => 'Class 5'],
+        ]);
+        
+        return view('admin.downloads.create', compact('categories', 'classes'));
+    })->name('test.downloads.create');
+});
+
+// Temporary test routes for Expenses views (remove after testing)
+Route::prefix('test-expenses')->middleware(['auth'])->group(function () {
+    // Expense Categories List
+    Route::get('/categories', function () {
+        $categories = collect([
+            (object)[
+                'id' => 1,
+                'name' => 'Office Supplies',
+                'code' => 'OFF',
+                'description' => 'Stationery, printing supplies, and office equipment',
+                'status' => 'active',
+                'expenses_count' => 45,
+                'total_amount' => 12500.00,
+                'created_at' => now()->subDays(90),
+            ],
+            (object)[
+                'id' => 2,
+                'name' => 'Utilities',
+                'code' => 'UTL',
+                'description' => 'Electricity, water, internet, and phone bills',
+                'status' => 'active',
+                'expenses_count' => 36,
+                'total_amount' => 85000.00,
+                'created_at' => now()->subDays(90),
+            ],
+            (object)[
+                'id' => 3,
+                'name' => 'Maintenance',
+                'code' => 'MNT',
+                'description' => 'Building and equipment maintenance and repairs',
+                'status' => 'active',
+                'expenses_count' => 28,
+                'total_amount' => 45000.00,
+                'created_at' => now()->subDays(60),
+            ],
+            (object)[
+                'id' => 4,
+                'name' => 'Salaries',
+                'code' => 'SAL',
+                'description' => 'Staff salaries and wages',
+                'status' => 'active',
+                'expenses_count' => 12,
+                'total_amount' => 250000.00,
+                'created_at' => now()->subDays(90),
+            ],
+            (object)[
+                'id' => 5,
+                'name' => 'Transport',
+                'code' => 'TRN',
+                'description' => 'Vehicle fuel, maintenance, and transport costs',
+                'status' => 'inactive',
+                'expenses_count' => 8,
+                'total_amount' => 15000.00,
+                'created_at' => now()->subDays(30),
+            ],
+        ]);
+        
+        $stats = [
+            'total' => 5,
+            'active' => 4,
+            'inactive' => 1,
+            'total_expenses' => 407500.00,
+        ];
+        
+        return view('admin.expenses.categories', compact('categories', 'stats'));
+    })->name('test.expense-categories.index');
+
+    // Expense Categories Create
+    Route::get('/categories/create', function () {
+        return view('admin.expenses.categories-create');
+    })->name('test.expense-categories.create');
+
+    // Expenses List
+    Route::get('/index', function () {
+        $expenses = collect([
+            (object)[
+                'id' => 1,
+                'title' => 'Monthly Electricity Bill',
+                'description' => 'Electricity bill for January 2026',
+                'amount' => 15000.00,
+                'expense_date' => '2026-01-05',
+                'category_id' => 2,
+                'category' => (object)['name' => 'Utilities'],
+                'payment_method' => 'bank_transfer',
+                'reference_number' => 'TXN-2026-001',
+                'vendor' => 'City Power Corporation',
+                'attachment' => 'receipts/electricity_jan.pdf',
+                'createdBy' => (object)['name' => 'Admin User'],
+                'created_at' => now()->subDays(3),
+            ],
+            (object)[
+                'id' => 2,
+                'title' => 'Office Stationery Purchase',
+                'description' => 'Pens, papers, files, and other stationery items',
+                'amount' => 2500.00,
+                'expense_date' => '2026-01-03',
+                'category_id' => 1,
+                'category' => (object)['name' => 'Office Supplies'],
+                'payment_method' => 'cash',
+                'reference_number' => null,
+                'vendor' => 'ABC Stationery Store',
+                'attachment' => null,
+                'createdBy' => (object)['name' => 'Accountant'],
+                'created_at' => now()->subDays(5),
+            ],
+            (object)[
+                'id' => 3,
+                'title' => 'AC Repair',
+                'description' => 'Air conditioner repair in staff room',
+                'amount' => 3500.00,
+                'expense_date' => '2026-01-02',
+                'category_id' => 3,
+                'category' => (object)['name' => 'Maintenance'],
+                'payment_method' => 'cheque',
+                'reference_number' => 'CHQ-456789',
+                'vendor' => 'Cool Tech Services',
+                'attachment' => 'receipts/ac_repair.pdf',
+                'createdBy' => (object)['name' => 'Admin User'],
+                'created_at' => now()->subDays(6),
+            ],
+            (object)[
+                'id' => 4,
+                'title' => 'Internet Bill - December',
+                'description' => 'Monthly internet subscription',
+                'amount' => 5000.00,
+                'expense_date' => '2025-12-28',
+                'category_id' => 2,
+                'category' => (object)['name' => 'Utilities'],
+                'payment_method' => 'online',
+                'reference_number' => 'PAY-2025-DEC-INT',
+                'vendor' => 'FastNet ISP',
+                'attachment' => null,
+                'createdBy' => (object)['name' => 'Accountant'],
+                'created_at' => now()->subDays(11),
+            ],
+        ]);
+        
+        $categories = collect([
+            (object)['id' => 1, 'name' => 'Office Supplies'],
+            (object)['id' => 2, 'name' => 'Utilities'],
+            (object)['id' => 3, 'name' => 'Maintenance'],
+            (object)['id' => 4, 'name' => 'Salaries'],
+            (object)['id' => 5, 'name' => 'Transport'],
+        ]);
+        
+        $stats = [
+            'total' => 407500.00,
+            'this_month' => 26000.00,
+            'this_year' => 407500.00,
+            'count' => 129,
+        ];
+        
+        return view('admin.expenses.index', compact('expenses', 'categories', 'stats'));
+    })->name('test.expenses.index');
+
+    // Expenses Create
+    Route::get('/create', function () {
+        $categories = collect([
+            (object)['id' => 1, 'name' => 'Office Supplies'],
+            (object)['id' => 2, 'name' => 'Utilities'],
+            (object)['id' => 3, 'name' => 'Maintenance'],
+            (object)['id' => 4, 'name' => 'Salaries'],
+            (object)['id' => 5, 'name' => 'Transport'],
+        ]);
+        
+        $recentExpenses = collect([
+            (object)[
+                'id' => 1,
+                'title' => 'Monthly Electricity Bill',
+                'amount' => 15000.00,
+                'category' => (object)['name' => 'Utilities'],
+            ],
+            (object)[
+                'id' => 2,
+                'title' => 'Office Stationery',
+                'amount' => 2500.00,
+                'category' => (object)['name' => 'Office Supplies'],
+            ],
+            (object)[
+                'id' => 3,
+                'title' => 'AC Repair',
+                'amount' => 3500.00,
+                'category' => (object)['name' => 'Maintenance'],
+            ],
+        ]);
+        
+        return view('admin.expenses.create', compact('categories', 'recentExpenses'));
+    })->name('test.expenses.create');
+});
+
+// Temporary test routes for Income views (remove after testing)
+Route::prefix('test-income')->middleware(['auth'])->group(function () {
+    // Income Categories List
+    Route::get('/categories', function () {
+        $categories = collect([
+            (object)[
+                'id' => 1,
+                'name' => 'Tuition Fees',
+                'code' => 'TUI',
+                'description' => 'Student tuition and course fees',
+                'status' => 'active',
+                'income_count' => 250,
+                'total_amount' => 1250000.00,
+                'created_at' => now()->subDays(90),
+            ],
+            (object)[
+                'id' => 2,
+                'name' => 'Admission Fees',
+                'code' => 'ADM',
+                'description' => 'New student admission and registration fees',
+                'status' => 'active',
+                'income_count' => 45,
+                'total_amount' => 225000.00,
+                'created_at' => now()->subDays(90),
+            ],
+            (object)[
+                'id' => 3,
+                'name' => 'Exam Fees',
+                'code' => 'EXM',
+                'description' => 'Examination and assessment fees',
+                'status' => 'active',
+                'income_count' => 180,
+                'total_amount' => 90000.00,
+                'created_at' => now()->subDays(60),
+            ],
+            (object)[
+                'id' => 4,
+                'name' => 'Library Fees',
+                'code' => 'LIB',
+                'description' => 'Library membership and late return fees',
+                'status' => 'active',
+                'income_count' => 120,
+                'total_amount' => 24000.00,
+                'created_at' => now()->subDays(90),
+            ],
+            (object)[
+                'id' => 5,
+                'name' => 'Transport Fees',
+                'code' => 'TRN',
+                'description' => 'School bus and transport service fees',
+                'status' => 'active',
+                'income_count' => 80,
+                'total_amount' => 160000.00,
+                'created_at' => now()->subDays(30),
+            ],
+            (object)[
+                'id' => 6,
+                'name' => 'Donations',
+                'code' => 'DON',
+                'description' => 'Charitable donations and contributions',
+                'status' => 'inactive',
+                'income_count' => 5,
+                'total_amount' => 50000.00,
+                'created_at' => now()->subDays(120),
+            ],
+        ]);
+        
+        $stats = [
+            'total' => 6,
+            'active' => 5,
+            'inactive' => 1,
+            'total_income' => 1799000.00,
+        ];
+        
+        return view('admin.income.categories', compact('categories', 'stats'));
+    })->name('test.income-categories.index');
+
+    // Income Categories Create
+    Route::get('/categories/create', function () {
+        return view('admin.income.categories-create');
+    })->name('test.income-categories.create');
+
+    // Income List (placeholder for future)
+    Route::get('/index', function () {
+        return redirect('/test-income/categories');
+    })->name('test.income.index');
+});
+
 require __DIR__.'/auth.php';
