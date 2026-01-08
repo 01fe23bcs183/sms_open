@@ -434,7 +434,7 @@ function examReport() {
                     data: {
                         labels: ['A+', 'A', 'B+', 'B', 'C+', 'C', 'D', 'F'],
                         datasets: [{
-                            data: @json($gradeDistribution ?? [15, 25, 20, 15, 10, 8, 5, 2]),
+                            data: {!! json_encode($gradeDistribution ?? [15, 25, 20, 15, 10, 8, 5, 2]) !!},
                             backgroundColor: [
                                 'rgba(25, 135, 84, 0.9)',
                                 'rgba(25, 135, 84, 0.7)',
@@ -467,10 +467,10 @@ function examReport() {
                 this.subjectPerformanceChart = new Chart(ctx2, {
                     type: 'bar',
                     data: {
-                        labels: @json($subjectLabels ?? ['Math', 'Science', 'English', 'History', 'Geography', 'Computer']),
+                        labels: {!! json_encode($subjectLabels ?? ['Math', 'Science', 'English', 'History', 'Geography', 'Computer']) !!},
                         datasets: [{
                             label: 'Average Score',
-                            data: @json($subjectScores ?? [78, 82, 75, 70, 72, 85]),
+                            data: {!! json_encode($subjectScores ?? [78, 82, 75, 70, 72, 85]) !!},
                             backgroundColor: function(context) {
                                 const value = context.raw;
                                 if (value >= 80) return 'rgba(25, 135, 84, 0.7)';
@@ -509,11 +509,11 @@ function examReport() {
                 this.performanceTrendChart = new Chart(ctx3, {
                     type: 'line',
                     data: {
-                        labels: @json($trendLabels ?? ['Unit Test 1', 'Mid Term', 'Unit Test 2', 'Final Exam']),
+                        labels: {!! json_encode($trendLabels ?? ['Unit Test 1', 'Mid Term', 'Unit Test 2', 'Final Exam']) !!},
                         datasets: [
                             {
                                 label: 'Average Score',
-                                data: @json($trendScores ?? [72, 75, 78, 80]),
+                                data: {!! json_encode($trendScores ?? [72, 75, 78, 80]) !!},
                                 borderColor: 'rgb(13, 110, 253)',
                                 backgroundColor: 'rgba(13, 110, 253, 0.1)',
                                 fill: true,
@@ -521,7 +521,7 @@ function examReport() {
                             },
                             {
                                 label: 'Pass Rate',
-                                data: @json($trendPassRate ?? [85, 88, 90, 92]),
+                                data: {!! json_encode($trendPassRate ?? [85, 88, 90, 92]) !!},
                                 borderColor: 'rgb(25, 135, 84)',
                                 backgroundColor: 'rgba(25, 135, 84, 0.1)',
                                 fill: true,

@@ -324,11 +324,11 @@ function studentReport() {
                 this.enrollmentTrendChart = new Chart(ctx1, {
                     type: 'line',
                     data: {
-                        labels: @json($trendData['labels'] ?? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']),
+                        labels: {!! json_encode($trendData['labels'] ?? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']) !!},
                         datasets: [
                             {
                                 label: 'New Admissions',
-                                data: @json($trendData['admissions'] ?? [15, 20, 25, 18, 22, 30, 45, 50, 35, 20, 15, 10]),
+                                data: {!! json_encode($trendData['admissions'] ?? [15, 20, 25, 18, 22, 30, 45, 50, 35, 20, 15, 10]) !!},
                                 borderColor: 'rgb(13, 110, 253)',
                                 backgroundColor: 'rgba(13, 110, 253, 0.1)',
                                 fill: true,
@@ -336,7 +336,7 @@ function studentReport() {
                             },
                             {
                                 label: 'Total Students',
-                                data: @json($trendData['total'] ?? [450, 470, 495, 513, 535, 565, 610, 660, 695, 715, 730, 740]),
+                                data: {!! json_encode($trendData['total'] ?? [450, 470, 495, 513, 535, 565, 610, 660, 695, 715, 730, 740]) !!},
                                 borderColor: 'rgb(25, 135, 84)',
                                 backgroundColor: 'rgba(25, 135, 84, 0.1)',
                                 fill: true,
@@ -399,10 +399,10 @@ function studentReport() {
                 this.classDistributionChart = new Chart(ctx3, {
                     type: 'bar',
                     data: {
-                        labels: @json($classDistribution['labels'] ?? ['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10']),
+                        labels: {!! json_encode($classDistribution['labels'] ?? ['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10']) !!},
                         datasets: [{
                             label: 'Students',
-                            data: @json($classDistribution['data'] ?? [45, 52, 48, 55, 60, 58, 62, 65, 70, 75]),
+                            data: {!! json_encode($classDistribution['data'] ?? [45, 52, 48, 55, 60, 58, 62, 65, 70, 75]) !!},
                             backgroundColor: 'rgba(13, 110, 253, 0.7)',
                             borderColor: 'rgb(13, 110, 253)',
                             borderWidth: 1
@@ -431,10 +431,10 @@ function studentReport() {
                 this.ageDistributionChart = new Chart(ctx4, {
                     type: 'bar',
                     data: {
-                        labels: @json($ageDistribution['labels'] ?? ['5-7', '8-10', '11-13', '14-16', '17-18']),
+                        labels: {!! json_encode($ageDistribution['labels'] ?? ['5-7', '8-10', '11-13', '14-16', '17-18']) !!},
                         datasets: [{
                             label: 'Students',
-                            data: @json($ageDistribution['data'] ?? [120, 180, 200, 160, 80]),
+                            data: {!! json_encode($ageDistribution['data'] ?? [120, 180, 200, 160, 80]) !!},
                             backgroundColor: [
                                 'rgba(13, 202, 240, 0.7)',
                                 'rgba(25, 135, 84, 0.7)',

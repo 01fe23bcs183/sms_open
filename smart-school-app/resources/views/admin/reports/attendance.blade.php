@@ -369,11 +369,11 @@ function attendanceReport() {
                 this.attendanceTrendChart = new Chart(ctx1, {
                     type: 'line',
                     data: {
-                        labels: @json($trendData['labels'] ?? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri']),
+                        labels: {!! json_encode($trendData['labels'] ?? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri']) !!},
                         datasets: [
                             {
                                 label: 'Present',
-                                data: @json($trendData['present'] ?? [92, 88, 95, 90, 85, 93, 91, 94, 89, 87]),
+                                data: {!! json_encode($trendData['present'] ?? [92, 88, 95, 90, 85, 93, 91, 94, 89, 87]) !!},
                                 borderColor: 'rgb(25, 135, 84)',
                                 backgroundColor: 'rgba(25, 135, 84, 0.1)',
                                 fill: true,
@@ -381,7 +381,7 @@ function attendanceReport() {
                             },
                             {
                                 label: 'Absent',
-                                data: @json($trendData['absent'] ?? [8, 12, 5, 10, 15, 7, 9, 6, 11, 13]),
+                                data: {!! json_encode($trendData['absent'] ?? [8, 12, 5, 10, 15, 7, 9, 6, 11, 13]) !!},
                                 borderColor: 'rgb(220, 53, 69)',
                                 backgroundColor: 'rgba(220, 53, 69, 0.1)',
                                 fill: true,
@@ -454,10 +454,10 @@ function attendanceReport() {
                 this.classComparisonChart = new Chart(ctx3, {
                     type: 'bar',
                     data: {
-                        labels: @json($classComparison['labels'] ?? ['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10']),
+                        labels: {!! json_encode($classComparison['labels'] ?? ['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10']) !!},
                         datasets: [{
                             label: 'Attendance %',
-                            data: @json($classComparison['data'] ?? [92, 88, 95, 90, 85, 93, 91, 94, 89, 87]),
+                            data: {!! json_encode($classComparison['data'] ?? [92, 88, 95, 90, 85, 93, 91, 94, 89, 87]) !!},
                             backgroundColor: function(context) {
                                 const value = context.raw;
                                 if (value >= 90) return 'rgba(25, 135, 84, 0.7)';
@@ -499,7 +499,7 @@ function attendanceReport() {
                         labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
                         datasets: [{
                             label: 'Attendance %',
-                            data: @json($dayWiseData ?? [92, 94, 95, 93, 88, 85]),
+                            data: {!! json_encode($dayWiseData ?? [92, 94, 95, 93, 88, 85]) !!},
                             backgroundColor: 'rgba(13, 110, 253, 0.2)',
                             borderColor: 'rgb(13, 110, 253)',
                             pointBackgroundColor: 'rgb(13, 110, 253)',

@@ -460,11 +460,11 @@ function financialReport() {
                 this.monthlyTrendChart = new Chart(ctx1, {
                     type: 'line',
                     data: {
-                        labels: @json($trendData['labels'] ?? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']),
+                        labels: {!! json_encode($trendData['labels'] ?? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']) !!},
                         datasets: [
                             {
                                 label: 'Income',
-                                data: @json($trendData['income'] ?? [50000, 55000, 52000, 60000, 65000, 62000, 70000, 68000, 75000, 72000, 78000, 85000]),
+                                data: {!! json_encode($trendData['income'] ?? [50000, 55000, 52000, 60000, 65000, 62000, 70000, 68000, 75000, 72000, 78000, 85000]) !!},
                                 borderColor: 'rgb(25, 135, 84)',
                                 backgroundColor: 'rgba(25, 135, 84, 0.1)',
                                 fill: true,
@@ -472,7 +472,7 @@ function financialReport() {
                             },
                             {
                                 label: 'Expenses',
-                                data: @json($trendData['expenses'] ?? [35000, 38000, 36000, 42000, 45000, 43000, 48000, 46000, 52000, 50000, 54000, 58000]),
+                                data: {!! json_encode($trendData['expenses'] ?? [35000, 38000, 36000, 42000, 45000, 43000, 48000, 46000, 52000, 50000, 54000, 58000]) !!},
                                 borderColor: 'rgb(220, 53, 69)',
                                 backgroundColor: 'rgba(220, 53, 69, 0.1)',
                                 fill: true,
@@ -480,7 +480,7 @@ function financialReport() {
                             },
                             {
                                 label: 'Net Profit',
-                                data: @json($trendData['profit'] ?? [15000, 17000, 16000, 18000, 20000, 19000, 22000, 22000, 23000, 22000, 24000, 27000]),
+                                data: {!! json_encode($trendData['profit'] ?? [15000, 17000, 16000, 18000, 20000, 19000, 22000, 22000, 23000, 22000, 24000, 27000]) !!},
                                 borderColor: 'rgb(13, 110, 253)',
                                 backgroundColor: 'rgba(13, 110, 253, 0.1)',
                                 fill: true,
@@ -550,10 +550,10 @@ function financialReport() {
                 this.incomeBreakdownChart = new Chart(ctx3, {
                     type: 'bar',
                     data: {
-                        labels: @json($incomeBreakdown['labels'] ?? ['Fee Collection', 'Donations', 'Grants', 'Other Income']),
+                        labels: {!! json_encode($incomeBreakdown['labels'] ?? ['Fee Collection', 'Donations', 'Grants', 'Other Income']) !!},
                         datasets: [{
                             label: 'Amount',
-                            data: @json($incomeBreakdown['data'] ?? [450000, 80000, 50000, 20000]),
+                            data: {!! json_encode($incomeBreakdown['data'] ?? [450000, 80000, 50000, 20000]) !!},
                             backgroundColor: [
                                 'rgba(25, 135, 84, 0.8)',
                                 'rgba(25, 135, 84, 0.6)',
@@ -592,10 +592,10 @@ function financialReport() {
                 this.expenseBreakdownChart = new Chart(ctx4, {
                     type: 'bar',
                     data: {
-                        labels: @json($expenseBreakdown['labels'] ?? ['Salaries', 'Utilities', 'Supplies', 'Maintenance', 'Other']),
+                        labels: {!! json_encode($expenseBreakdown['labels'] ?? ['Salaries', 'Utilities', 'Supplies', 'Maintenance', 'Other']) !!},
                         datasets: [{
                             label: 'Amount',
-                            data: @json($expenseBreakdown['data'] ?? [280000, 45000, 35000, 25000, 15000]),
+                            data: {!! json_encode($expenseBreakdown['data'] ?? [280000, 45000, 35000, 25000, 15000]) !!},
                             backgroundColor: [
                                 'rgba(220, 53, 69, 0.8)',
                                 'rgba(220, 53, 69, 0.6)',

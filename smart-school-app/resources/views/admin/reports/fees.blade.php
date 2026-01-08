@@ -427,11 +427,11 @@ function feeReport() {
                 this.collectionTrendChart = new Chart(ctx1, {
                     type: 'line',
                     data: {
-                        labels: @json($trendData['labels'] ?? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']),
+                        labels: {!! json_encode($trendData['labels'] ?? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']) !!},
                         datasets: [
                             {
                                 label: 'Collected',
-                                data: @json($trendData['collected'] ?? [50000, 65000, 55000, 70000, 80000, 75000, 90000, 85000, 95000, 88000, 92000, 100000]),
+                                data: {!! json_encode($trendData['collected'] ?? [50000, 65000, 55000, 70000, 80000, 75000, 90000, 85000, 95000, 88000, 92000, 100000]) !!},
                                 borderColor: 'rgb(25, 135, 84)',
                                 backgroundColor: 'rgba(25, 135, 84, 0.1)',
                                 fill: true,
@@ -439,7 +439,7 @@ function feeReport() {
                             },
                             {
                                 label: 'Target',
-                                data: @json($trendData['target'] ?? [60000, 60000, 60000, 80000, 80000, 80000, 100000, 100000, 100000, 100000, 100000, 100000]),
+                                data: {!! json_encode($trendData['target'] ?? [60000, 60000, 60000, 80000, 80000, 80000, 100000, 100000, 100000, 100000, 100000, 100000]) !!},
                                 borderColor: 'rgb(13, 110, 253)',
                                 borderDash: [5, 5],
                                 fill: false,
@@ -475,9 +475,9 @@ function feeReport() {
                 this.feeTypeChart = new Chart(ctx2, {
                     type: 'doughnut',
                     data: {
-                        labels: @json($feeTypeData['labels'] ?? ['Tuition', 'Transport', 'Library', 'Lab', 'Sports', 'Other']),
+                        labels: {!! json_encode($feeTypeData['labels'] ?? ['Tuition', 'Transport', 'Library', 'Lab', 'Sports', 'Other']) !!},
                         datasets: [{
-                            data: @json($feeTypeData['data'] ?? [45, 20, 10, 10, 8, 7]),
+                            data: {!! json_encode($feeTypeData['data'] ?? [45, 20, 10, 10, 8, 7]) !!},
                             backgroundColor: [
                                 'rgba(13, 110, 253, 0.8)',
                                 'rgba(25, 135, 84, 0.8)',
@@ -511,7 +511,7 @@ function feeReport() {
                         labels: ['Cash', 'Cheque', 'Online', 'Card'],
                         datasets: [{
                             label: 'Amount',
-                            data: @json($paymentMethodData ?? [350000, 150000, 280000, 120000]),
+                            data: {!! json_encode($paymentMethodData ?? [350000, 150000, 280000, 120000]) !!},
                             backgroundColor: [
                                 'rgba(25, 135, 84, 0.7)',
                                 'rgba(13, 110, 253, 0.7)',
@@ -549,17 +549,17 @@ function feeReport() {
                 this.classCollectionChart = new Chart(ctx4, {
                     type: 'bar',
                     data: {
-                        labels: @json($classCollectionData['labels'] ?? ['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10']),
+                        labels: {!! json_encode($classCollectionData['labels'] ?? ['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10']) !!},
                         datasets: [
                             {
                                 label: 'Collected',
-                                data: @json($classCollectionData['collected'] ?? [45000, 52000, 48000, 55000, 60000, 58000, 62000, 65000, 70000, 75000]),
+                                data: {!! json_encode($classCollectionData['collected'] ?? [45000, 52000, 48000, 55000, 60000, 58000, 62000, 65000, 70000, 75000]) !!},
                                 backgroundColor: 'rgba(25, 135, 84, 0.7)',
                                 borderWidth: 0
                             },
                             {
                                 label: 'Pending',
-                                data: @json($classCollectionData['pending'] ?? [5000, 8000, 12000, 5000, 10000, 12000, 8000, 15000, 10000, 5000]),
+                                data: {!! json_encode($classCollectionData['pending'] ?? [5000, 8000, 12000, 5000, 10000, 12000, 8000, 15000, 10000, 5000]) !!},
                                 backgroundColor: 'rgba(220, 53, 69, 0.7)',
                                 borderWidth: 0
                             }

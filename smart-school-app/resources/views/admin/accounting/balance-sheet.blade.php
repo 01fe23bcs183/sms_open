@@ -401,11 +401,11 @@ function balanceSheet() {
                 this.balanceTrendChart = new Chart(ctx1, {
                     type: 'line',
                     data: {
-                        labels: @json($trendData['labels'] ?? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']),
+                        labels: {!! json_encode($trendData['labels'] ?? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']) !!},
                         datasets: [
                             {
                                 label: 'Income',
-                                data: @json($trendData['income'] ?? [5000, 6000, 5500, 7000, 6500, 8000]),
+                                data: {!! json_encode($trendData['income'] ?? [5000, 6000, 5500, 7000, 6500, 8000]) !!},
                                 borderColor: 'rgb(25, 135, 84)',
                                 backgroundColor: 'rgba(25, 135, 84, 0.1)',
                                 fill: true,
@@ -413,7 +413,7 @@ function balanceSheet() {
                             },
                             {
                                 label: 'Expenses',
-                                data: @json($trendData['expenses'] ?? [3000, 3500, 4000, 3800, 4200, 4500]),
+                                data: {!! json_encode($trendData['expenses'] ?? [3000, 3500, 4000, 3800, 4200, 4500]) !!},
                                 borderColor: 'rgb(220, 53, 69)',
                                 backgroundColor: 'rgba(220, 53, 69, 0.1)',
                                 fill: true,
@@ -421,7 +421,7 @@ function balanceSheet() {
                             },
                             {
                                 label: 'Net Balance',
-                                data: @json($trendData['balance'] ?? [2000, 2500, 1500, 3200, 2300, 3500]),
+                                data: {!! json_encode($trendData['balance'] ?? [2000, 2500, 1500, 3200, 2300, 3500]) !!},
                                 borderColor: 'rgb(13, 110, 253)',
                                 backgroundColor: 'rgba(13, 110, 253, 0.1)',
                                 fill: true,

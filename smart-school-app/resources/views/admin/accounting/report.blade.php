@@ -359,18 +359,18 @@ function accountingReport() {
                 this.incomeExpenseChart = new Chart(ctx1, {
                     type: 'bar',
                     data: {
-                        labels: @json($chartData['labels'] ?? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']),
+                        labels: {!! json_encode($chartData['labels'] ?? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']) !!},
                         datasets: [
                             {
                                 label: 'Income',
-                                data: @json($chartData['income'] ?? [5000, 6000, 5500, 7000, 6500, 8000]),
+                                data: {!! json_encode($chartData['income'] ?? [5000, 6000, 5500, 7000, 6500, 8000]) !!},
                                 backgroundColor: 'rgba(25, 135, 84, 0.7)',
                                 borderColor: 'rgb(25, 135, 84)',
                                 borderWidth: 1
                             },
                             {
                                 label: 'Expenses',
-                                data: @json($chartData['expenses'] ?? [3000, 3500, 4000, 3800, 4200, 4500]),
+                                data: {!! json_encode($chartData['expenses'] ?? [3000, 3500, 4000, 3800, 4200, 4500]) !!},
                                 backgroundColor: 'rgba(220, 53, 69, 0.7)',
                                 borderColor: 'rgb(220, 53, 69)',
                                 borderWidth: 1
@@ -405,9 +405,9 @@ function accountingReport() {
                 this.categoryChart = new Chart(ctx2, {
                     type: 'doughnut',
                     data: {
-                        labels: @json($categoryChartData['labels'] ?? ['Fee Collection', 'Donations', 'Other Income', 'Salaries', 'Utilities', 'Supplies']),
+                        labels: {!! json_encode($categoryChartData['labels'] ?? ['Fee Collection', 'Donations', 'Other Income', 'Salaries', 'Utilities', 'Supplies']) !!},
                         datasets: [{
-                            data: @json($categoryChartData['data'] ?? [45, 20, 10, 15, 5, 5]),
+                            data: {!! json_encode($categoryChartData['data'] ?? [45, 20, 10, 15, 5, 5]) !!},
                             backgroundColor: [
                                 'rgba(25, 135, 84, 0.8)',
                                 'rgba(13, 110, 253, 0.8)',
