@@ -7,6 +7,11 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Test route for Session 12 components (temporary - remove after testing)
+Route::get('/test-components', function () {
+    return view('test-components');
+})->name('test.components');
+
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
