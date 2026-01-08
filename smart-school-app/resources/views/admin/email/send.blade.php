@@ -14,16 +14,16 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0">
                     <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('email.logs') }}">Email</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('test.email.logs') }}">Email</a></li>
                     <li class="breadcrumb-item active">Send</li>
                 </ol>
             </nav>
         </div>
         <div class="d-flex gap-2 mt-3 mt-md-0">
-            <a href="{{ route('email.logs') }}" class="btn btn-outline-secondary">
+            <a href="{{ route('test.email.logs') }}" class="btn btn-outline-secondary">
                 <i class="bi bi-list-ul me-1"></i> Email Logs
             </a>
-            <a href="{{ route('email.templates') }}" class="btn btn-outline-secondary">
+            <a href="#" class="btn btn-outline-secondary">
                 <i class="bi bi-file-text me-1"></i> Templates
             </a>
         </div>
@@ -45,7 +45,7 @@
     <div class="row">
         <!-- Main Form -->
         <div class="col-lg-8">
-            <form action="{{ route('email.store') }}" method="POST" enctype="multipart/form-data" @submit="handleSubmit">
+            <form action="#" method="POST" enctype="multipart/form-data" @submit="handleSubmit">
                 @csrf
                 
                 <x-card>
@@ -323,7 +323,7 @@
                                 <button type="button" class="btn btn-outline-secondary" @click="previewEmail()">
                                     <i class="bi bi-eye me-1"></i> Preview
                                 </button>
-                                <a href="{{ route('email.logs') }}" class="btn btn-secondary">Cancel</a>
+                                <a href="{{ route('test.email.logs') }}" class="btn btn-secondary">Cancel</a>
                                 <button type="submit" class="btn btn-primary" :disabled="isSubmitting || !canSend()">
                                     <span x-show="!isSubmitting">
                                         <i class="bi bi-send me-1"></i> 

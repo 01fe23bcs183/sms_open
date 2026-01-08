@@ -23,7 +23,7 @@
             <button type="button" class="btn btn-outline-success" @click="exportLogs()">
                 <i class="bi bi-download me-1"></i> Export
             </button>
-            <a href="{{ route('email.send') }}" class="btn btn-primary">
+            <a href="{{ route('test.email.send') }}" class="btn btn-primary">
                 <i class="bi bi-envelope me-1"></i> Send Email
             </a>
         </div>
@@ -89,7 +89,7 @@
             <strong>This Month:</strong> {{ $stats['this_month'] ?? 0 }} emails sent
             <span class="mx-2">|</span>
             <strong>Today:</strong> {{ $stats['today'] ?? 0 }} emails sent
-            <a href="{{ route('email.settings') }}" class="ms-3 text-decoration-none">
+            <a href="#" class="ms-3 text-decoration-none">
                 <i class="bi bi-gear me-1"></i> Email Settings
             </a>
         </div>
@@ -292,7 +292,7 @@
                                 <div class="text-muted">
                                     <i class="bi bi-envelope fs-1 d-block mb-2"></i>
                                     <p class="mb-2">No email logs found</p>
-                                    <a href="{{ route('email.send') }}" class="btn btn-primary btn-sm">
+                                    <a href="{{ route('test.email.send') }}" class="btn btn-primary btn-sm">
                                         <i class="bi bi-envelope me-1"></i> Send Email
                                     </a>
                                 </div>
@@ -318,7 +318,7 @@
     <!-- Quick Links -->
     <div class="row g-3 mt-4">
         <div class="col-md-4">
-            <a href="{{ route('email.send') }}" class="card text-decoration-none h-100">
+            <a href="{{ route('test.email.send') }}" class="card text-decoration-none h-100">
                 <div class="card-body text-center">
                     <i class="bi bi-envelope fs-1 text-primary mb-2 d-block"></i>
                     <h6 class="mb-0">Send Email</h6>
@@ -327,7 +327,7 @@
             </a>
         </div>
         <div class="col-md-4">
-            <a href="{{ route('email.templates') }}" class="card text-decoration-none h-100">
+            <a href="#" class="card text-decoration-none h-100">
                 <div class="card-body text-center">
                     <i class="bi bi-file-text fs-1 text-success mb-2 d-block"></i>
                     <h6 class="mb-0">Email Templates</h6>
@@ -336,7 +336,7 @@
             </a>
         </div>
         <div class="col-md-4">
-            <a href="{{ route('email.settings') }}" class="card text-decoration-none h-100">
+            <a href="#" class="card text-decoration-none h-100">
                 <div class="card-body text-center">
                     <i class="bi bi-gear fs-1 text-warning mb-2 d-block"></i>
                     <h6 class="mb-0">Email Settings</h6>
@@ -541,7 +541,7 @@ function emailLogsManager() {
         
         resendFailed() {
             if (confirm('Are you sure you want to resend all failed emails?')) {
-                window.location.href = '{{ route("email.resend-failed") }}';
+                window.location.href = '#';
             }
         },
         
@@ -551,7 +551,7 @@ function emailLogsManager() {
         
         exportLogs() {
             const params = new URLSearchParams(this.filters);
-            window.location.href = `{{ route('email.export') }}?${params.toString()}`;
+            window.location.href = `#?${params.toString()}`;
         }
     };
 }
