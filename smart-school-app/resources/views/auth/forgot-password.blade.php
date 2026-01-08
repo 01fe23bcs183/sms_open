@@ -1,25 +1,77 @@
-<x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
+@extends('layouts.auth')
+
+@section('title', 'Forgot Password')
+
+@section('content')
+<div class="mb-4 text-center">
+    <h5 class="fw-bold text-dark mb-1">Forgot Password?</h5>
+    <p class="text-muted small">Enter your email to receive a password reset link</p>
+</div>
+
+<form method="POST" action="{{ route('password.email') }}" id="forgotPasswordForm" x-data="{ loading: false }">
+    @csrf
+
+    <!-- Email Address -->
+    <div class="mb-4">
+        <label for="email" class="form-label">
+            <i class="bi bi-envelope me-1"></i>Email Address <span class="text-danger">*</span>
+        </label>
+        <input type="email" 
+               class="form-control @error('email') is-invalid @enderror" 
+               id="email" 
+               name="email" 
+               value="{{ old('email') }}"
+               placeholder="Enter your registered email"
+               required 
+               autofocus>
+        @error('email')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+        <small class="text-muted d-block mt-2">
+            <i class="bi bi-info-circle me-1"></i>
+            We'll send a password reset link to this email
+        </small>
     </div>
 
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+    <!-- Submit Button -->
+    <button type="submit" class="btn btn-primary w-100 mb-3" id="submitBtn" :disabled="loading">
+        <span class="btn-text" x-show="!loading">
+            <i class="bi bi-envelope-arrow-up me-2"></i>Send Reset Link
+        </span>
+        <span x-show="loading" x-cloak>
+            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+            Sending...
+        </span>
+    </button>
 
-    <form method="POST" action="{{ route('password.email') }}">
-        @csrf
+    <!-- Back to Login -->
+    <div class="text-center">
+        <a href="{{ route('login') }}" class="auth-link small">
+            <i class="bi bi-arrow-left me-1"></i>Back to Login
+        </a>
+    </div>
+</form>
+@endsection
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
+@section('footer')
+<div class="text-center">
+    <p class="small text-muted mb-2">
+        <i class="bi bi-question-circle me-1"></i>
+        Didn't receive the email?
+    </p>
+    <ul class="list-unstyled small text-muted mb-0">
+        <li>Check your spam folder</li>
+        <li>Make sure you entered the correct email</li>
+        <li>Contact support if the issue persists</li>
+    </ul>
+</div>
+@endsection
 
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Email Password Reset Link') }}
-            </x-primary-button>
-        </div>
-    </form>
-</x-guest-layout>
+@push('scripts')
+<script>
+    // Form submission with loading state
+    document.getElementById('forgotPasswordForm').addEventListener('submit', function() {
+        this._x_dataStack[0].loading = true;
+    });
+</script>
+@endpush
