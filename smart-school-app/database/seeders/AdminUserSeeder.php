@@ -27,18 +27,19 @@ class AdminUserSeeder extends Seeder
             throw new \RuntimeException('ADMIN_PASSWORD environment variable must be set in production');
         }
         
-        $admin = User::firstOrCreate(
-            ['email' => $adminEmail],
-            [
-                'name' => 'Admin User',
-                'first_name' => 'Admin',
-                'last_name' => 'User',
-                'email' => $adminEmail,
-                'password' => Hash::make($adminPassword),
-                'email_verified_at' => now(),
-                'is_active' => true,
-            ]
-        );
+                $admin = User::firstOrCreate(
+                    ['email' => $adminEmail],
+                    [
+                        'uuid' => \Illuminate\Support\Str::uuid()->toString(),
+                        'name' => 'Admin User',
+                        'first_name' => 'Admin',
+                        'last_name' => 'User',
+                        'email' => $adminEmail,
+                        'password' => Hash::make($adminPassword),
+                        'email_verified_at' => now(),
+                        'is_active' => true,
+                    ]
+                );
 
         // Assign admin role
         $adminRole = Role::where('name', 'admin')->first();
