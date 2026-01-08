@@ -4452,6 +4452,61 @@ Route::prefix('test-settings')->middleware(['auth'])->group(function () {
             'modules' => collect([]),
         ]);
     })->name('test.settings.permissions');
+
+    // Session 28: User Management & Final System Views
+    Route::get('/users', function () {
+        return view('admin.settings.users');
+    })->name('test.settings.users');
+
+    Route::get('/users/create', function () {
+        return view('admin.settings.users-create');
+    })->name('test.settings.users.create');
+
+    Route::get('/profile', function () {
+        return view('admin.settings.profile');
+    })->name('test.settings.profile');
+
+    Route::get('/activity-logs', function () {
+        return view('admin.settings.activity-logs');
+    })->name('test.settings.activity-logs');
+
+    Route::get('/system-info', function () {
+        return view('admin.settings.system-info');
+    })->name('test.settings.system-info');
+
+    Route::get('/maintenance', function () {
+        return view('admin.settings.maintenance');
+    })->name('test.settings.maintenance');
+
+    Route::get('/api', function () {
+        return view('admin.settings.api');
+    })->name('test.settings.api');
+
+    Route::get('/import-export', function () {
+        return view('admin.settings.import-export');
+    })->name('test.settings.import-export');
+
+    Route::get('/help', function () {
+        return view('admin.settings.help');
+    })->name('test.settings.help');
+
+    Route::get('/about', function () {
+        return view('admin.settings.about');
+    })->name('test.settings.about');
+});
+
+// Named route aliases for Session 28 settings views (temporary - remove after backend is implemented)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/settings/users', fn() => redirect('/test-settings/users'))->name('settings.users');
+    Route::get('/settings/users/create', fn() => redirect('/test-settings/users/create'))->name('settings.users.create');
+    Route::get('/settings/profile', fn() => redirect('/test-settings/profile'))->name('settings.profile');
+    Route::get('/settings/activity-logs', fn() => redirect('/test-settings/activity-logs'))->name('settings.activity-logs');
+    Route::get('/settings/system-info', fn() => redirect('/test-settings/system-info'))->name('settings.system-info');
+    Route::get('/settings/maintenance', fn() => redirect('/test-settings/maintenance'))->name('settings.maintenance');
+    Route::get('/settings/api', fn() => redirect('/test-settings/api'))->name('settings.api');
+    Route::get('/settings/import-export', fn() => redirect('/test-settings/import-export'))->name('settings.import-export');
+    Route::get('/settings/help', fn() => redirect('/test-settings/help'))->name('settings.help');
+    Route::get('/settings/about', fn() => redirect('/test-settings/about'))->name('settings.about');
 });
 
 require __DIR__.'/auth.php';
