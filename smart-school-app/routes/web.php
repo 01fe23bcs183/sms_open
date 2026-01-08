@@ -1,26 +1,642 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UploadController;
+use App\Http\Controllers\DownloadController;
 use Illuminate\Support\Facades\Route;
 
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Prompt 292: Define Web Routes and Named Route Map
+| 
+| This file registers role-based route groups with consistent naming conventions.
+| Route naming convention: {role}.{module}.{action}
+| Example: admin.students.index, teacher.attendance.mark
+|
+*/
+
+// Public Routes
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('home');
 
-// Test route for Session 12 components (temporary - remove after testing)
-Route::get('/test-components', function () {
-    return view('test-components');
-})->name('test.components');
-
+// Dashboard redirect based on role
 Route::get('/dashboard', function () {
+    $user = auth()->user();
+    
+    if ($user && $user->hasRole('admin')) {
+        return redirect()->route('admin.dashboard');
+    } elseif ($user && $user->hasRole('teacher')) {
+        return redirect()->route('teacher.dashboard');
+    } elseif ($user && $user->hasRole('student')) {
+        return redirect()->route('student.dashboard');
+    } elseif ($user && $user->hasRole('parent')) {
+        return redirect()->route('parent.dashboard');
+    } elseif ($user && $user->hasRole('accountant')) {
+        return redirect()->route('accountant.dashboard');
+    } elseif ($user && $user->hasRole('librarian')) {
+        return redirect()->route('librarian.dashboard');
+    }
+    
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+// Profile Routes (common for all authenticated users)
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Admin Routes
+|--------------------------------------------------------------------------
+*/
+Route::prefix('admin')
+    ->name('admin.')
+    ->middleware(['auth', 'verified', 'role:admin'])
+    ->group(function () {
+        
+        // Dashboard
+        Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
+        
+        // Academic Sessions
+        Route::resource('academic-sessions', \App\Http\Controllers\Admin\AcademicSessionController::class);
+        Route::post('academic-sessions/{academicSession}/set-current', [\App\Http\Controllers\Admin\AcademicSessionController::class, 'setCurrent'])->name('academic-sessions.set-current');
+        
+        // Classes
+        Route::resource('classes', \App\Http\Controllers\Admin\ClassController::class);
+        Route::get('classes/{class}/sections', [\App\Http\Controllers\Admin\ClassController::class, 'sections'])->name('classes.sections');
+        
+        // Sections
+        Route::resource('sections', \App\Http\Controllers\Admin\SectionController::class);
+        
+        // Subjects
+        Route::resource('subjects', \App\Http\Controllers\Admin\SubjectController::class);
+        Route::post('subjects/import', [\App\Http\Controllers\Admin\SubjectController::class, 'import'])->name('subjects.import');
+        Route::get('subjects/export', [\App\Http\Controllers\Admin\SubjectController::class, 'export'])->name('subjects.export');
+        
+        // Class Subjects (Teacher Assignment)
+        Route::resource('class-subjects', \App\Http\Controllers\Admin\ClassSubjectController::class)->except(['show']);
+        Route::get('class-subjects/by-class/{class}', [\App\Http\Controllers\Admin\ClassSubjectController::class, 'byClass'])->name('class-subjects.by-class');
+        
+        // Timetable
+        Route::resource('timetables', \App\Http\Controllers\Admin\TimetableController::class);
+        Route::get('timetables/class/{class}/section/{section}', [\App\Http\Controllers\Admin\TimetableController::class, 'byClassSection'])->name('timetables.by-class-section');
+        Route::post('timetables/generate', [\App\Http\Controllers\Admin\TimetableController::class, 'generate'])->name('timetables.generate');
+        Route::get('timetables/print/{class}/{section}', [\App\Http\Controllers\Admin\TimetableController::class, 'print'])->name('timetables.print');
+        
+        // Student Categories
+        Route::resource('student-categories', \App\Http\Controllers\Admin\StudentCategoryController::class);
+        
+        // Students
+        Route::resource('students', \App\Http\Controllers\Admin\StudentController::class);
+        Route::get('students/{student}/profile', [\App\Http\Controllers\Admin\StudentController::class, 'profile'])->name('students.profile');
+        Route::get('students/{student}/documents', [\App\Http\Controllers\Admin\StudentController::class, 'documents'])->name('students.documents');
+        Route::post('students/{student}/documents', [\App\Http\Controllers\Admin\StudentController::class, 'uploadDocument'])->name('students.documents.upload');
+        Route::delete('students/{student}/documents/{document}', [\App\Http\Controllers\Admin\StudentController::class, 'deleteDocument'])->name('students.documents.delete');
+        Route::get('students/import', [\App\Http\Controllers\Admin\StudentController::class, 'importForm'])->name('students.import.form');
+        Route::post('students/import', [\App\Http\Controllers\Admin\StudentController::class, 'import'])->name('students.import');
+        Route::get('students/export', [\App\Http\Controllers\Admin\StudentController::class, 'export'])->name('students.export');
+        Route::get('students/bulk-actions', [\App\Http\Controllers\Admin\StudentController::class, 'bulkActionsForm'])->name('students.bulk-actions.form');
+        Route::post('students/bulk-actions', [\App\Http\Controllers\Admin\StudentController::class, 'bulkActions'])->name('students.bulk-actions');
+        
+        // Student Promotions
+        Route::get('promotions', [\App\Http\Controllers\Admin\PromotionController::class, 'index'])->name('promotions.index');
+        Route::get('promotions/create', [\App\Http\Controllers\Admin\PromotionController::class, 'create'])->name('promotions.create');
+        Route::post('promotions', [\App\Http\Controllers\Admin\PromotionController::class, 'store'])->name('promotions.store');
+        Route::get('promotions/history', [\App\Http\Controllers\Admin\PromotionController::class, 'history'])->name('promotions.history');
+        
+        // Attendance Types
+        Route::resource('attendance-types', \App\Http\Controllers\Admin\AttendanceTypeController::class);
+        
+        // Attendance
+        Route::get('attendance', [\App\Http\Controllers\Admin\AttendanceController::class, 'index'])->name('attendance.index');
+        Route::get('attendance/mark', [\App\Http\Controllers\Admin\AttendanceController::class, 'markForm'])->name('attendance.mark');
+        Route::post('attendance/mark', [\App\Http\Controllers\Admin\AttendanceController::class, 'mark'])->name('attendance.store');
+        Route::get('attendance/{attendance}/edit', [\App\Http\Controllers\Admin\AttendanceController::class, 'edit'])->name('attendance.edit');
+        Route::put('attendance/{attendance}', [\App\Http\Controllers\Admin\AttendanceController::class, 'update'])->name('attendance.update');
+        Route::get('attendance/report', [\App\Http\Controllers\Admin\AttendanceController::class, 'report'])->name('attendance.report');
+        Route::get('attendance/calendar/{student}', [\App\Http\Controllers\Admin\AttendanceController::class, 'calendar'])->name('attendance.calendar');
+        Route::get('attendance/export', [\App\Http\Controllers\Admin\AttendanceController::class, 'export'])->name('attendance.export');
+        Route::get('attendance/print', [\App\Http\Controllers\Admin\AttendanceController::class, 'print'])->name('attendance.print');
+        Route::get('attendance/sms', [\App\Http\Controllers\Admin\AttendanceController::class, 'smsForm'])->name('attendance.sms');
+        Route::post('attendance/sms', [\App\Http\Controllers\Admin\AttendanceController::class, 'sendSms'])->name('attendance.sms.send');
+        
+        // Exam Types
+        Route::resource('exam-types', \App\Http\Controllers\Admin\ExamTypeController::class);
+        
+        // Exam Grades
+        Route::resource('exam-grades', \App\Http\Controllers\Admin\ExamGradeController::class);
+        
+        // Exams
+        Route::resource('exams', \App\Http\Controllers\Admin\ExamController::class);
+        Route::get('exams/{exam}/schedule', [\App\Http\Controllers\Admin\ExamController::class, 'schedule'])->name('exams.schedule');
+        Route::post('exams/{exam}/schedule', [\App\Http\Controllers\Admin\ExamController::class, 'saveSchedule'])->name('exams.schedule.save');
+        Route::get('exams/{exam}/attendance', [\App\Http\Controllers\Admin\ExamController::class, 'attendance'])->name('exams.attendance');
+        Route::post('exams/{exam}/attendance', [\App\Http\Controllers\Admin\ExamController::class, 'saveAttendance'])->name('exams.attendance.save');
+        Route::get('exams/{exam}/marks', [\App\Http\Controllers\Admin\ExamController::class, 'marks'])->name('exams.marks');
+        Route::post('exams/{exam}/marks', [\App\Http\Controllers\Admin\ExamController::class, 'saveMarks'])->name('exams.marks.save');
+        Route::post('exams/{exam}/publish', [\App\Http\Controllers\Admin\ExamController::class, 'publish'])->name('exams.publish');
+        Route::get('exams/{exam}/results', [\App\Http\Controllers\Admin\ExamController::class, 'results'])->name('exams.results');
+        Route::get('exams/{exam}/results/print', [\App\Http\Controllers\Admin\ExamController::class, 'printResults'])->name('exams.results.print');
+        
+        // Fees Types
+        Route::resource('fees-types', \App\Http\Controllers\Admin\FeesTypeController::class);
+        
+        // Fees Groups
+        Route::resource('fees-groups', \App\Http\Controllers\Admin\FeesGroupController::class);
+        
+        // Fees Masters
+        Route::resource('fees-masters', \App\Http\Controllers\Admin\FeesMasterController::class);
+        Route::get('fees-masters/by-class/{class}', [\App\Http\Controllers\Admin\FeesMasterController::class, 'byClass'])->name('fees-masters.by-class');
+        
+        // Fees Discounts
+        Route::resource('fees-discounts', \App\Http\Controllers\Admin\FeesDiscountController::class);
+        
+        // Fees Fines
+        Route::resource('fees-fines', \App\Http\Controllers\Admin\FeesFineController::class);
+        
+        // Fees Allotments
+        Route::get('fees-allotments', [\App\Http\Controllers\Admin\FeesAllotmentController::class, 'index'])->name('fees-allotments.index');
+        Route::get('fees-allotments/create', [\App\Http\Controllers\Admin\FeesAllotmentController::class, 'create'])->name('fees-allotments.create');
+        Route::post('fees-allotments', [\App\Http\Controllers\Admin\FeesAllotmentController::class, 'store'])->name('fees-allotments.store');
+        Route::get('fees-allotments/{student}', [\App\Http\Controllers\Admin\FeesAllotmentController::class, 'show'])->name('fees-allotments.show');
+        Route::delete('fees-allotments/{allotment}', [\App\Http\Controllers\Admin\FeesAllotmentController::class, 'destroy'])->name('fees-allotments.destroy');
+        
+        // Fees Collection
+        Route::get('fees-collection', [\App\Http\Controllers\Admin\FeesCollectionController::class, 'index'])->name('fees-collection.index');
+        Route::get('fees-collection/collect/{student}', [\App\Http\Controllers\Admin\FeesCollectionController::class, 'collectForm'])->name('fees-collection.collect');
+        Route::post('fees-collection/collect/{student}', [\App\Http\Controllers\Admin\FeesCollectionController::class, 'collect'])->name('fees-collection.store');
+        Route::get('fees-collection/receipt/{transaction}', [\App\Http\Controllers\Admin\FeesCollectionController::class, 'receipt'])->name('fees-collection.receipt');
+        Route::get('fees-collection/report', [\App\Http\Controllers\Admin\FeesCollectionController::class, 'report'])->name('fees-collection.report');
+        Route::get('fees-collection/due', [\App\Http\Controllers\Admin\FeesCollectionController::class, 'dueReport'])->name('fees-collection.due');
+        Route::get('fees-collection/export', [\App\Http\Controllers\Admin\FeesCollectionController::class, 'export'])->name('fees-collection.export');
+        
+        // Library Categories
+        Route::resource('library-categories', \App\Http\Controllers\Admin\LibraryCategoryController::class);
+        
+        // Library Books
+        Route::resource('library-books', \App\Http\Controllers\Admin\LibraryBookController::class);
+        Route::get('library-books/import', [\App\Http\Controllers\Admin\LibraryBookController::class, 'importForm'])->name('library-books.import.form');
+        Route::post('library-books/import', [\App\Http\Controllers\Admin\LibraryBookController::class, 'import'])->name('library-books.import');
+        Route::get('library-books/export', [\App\Http\Controllers\Admin\LibraryBookController::class, 'export'])->name('library-books.export');
+        
+        // Library Members
+        Route::resource('library-members', \App\Http\Controllers\Admin\LibraryMemberController::class);
+        Route::get('library-members/{member}/card', [\App\Http\Controllers\Admin\LibraryMemberController::class, 'card'])->name('library-members.card');
+        
+        // Library Issues
+        Route::get('library-issues', [\App\Http\Controllers\Admin\LibraryIssueController::class, 'index'])->name('library-issues.index');
+        Route::get('library-issues/issue', [\App\Http\Controllers\Admin\LibraryIssueController::class, 'issueForm'])->name('library-issues.issue');
+        Route::post('library-issues/issue', [\App\Http\Controllers\Admin\LibraryIssueController::class, 'issue'])->name('library-issues.store');
+        Route::get('library-issues/{issue}/return', [\App\Http\Controllers\Admin\LibraryIssueController::class, 'returnForm'])->name('library-issues.return');
+        Route::post('library-issues/{issue}/return', [\App\Http\Controllers\Admin\LibraryIssueController::class, 'returnBook'])->name('library-issues.return.store');
+        Route::get('library-issues/overdue', [\App\Http\Controllers\Admin\LibraryIssueController::class, 'overdue'])->name('library-issues.overdue');
+        Route::get('library-issues/report', [\App\Http\Controllers\Admin\LibraryIssueController::class, 'report'])->name('library-issues.report');
+        
+        // Transport Routes
+        Route::resource('transport-routes', \App\Http\Controllers\Admin\TransportRouteController::class);
+        Route::get('transport-routes/{route}/stops', [\App\Http\Controllers\Admin\TransportRouteController::class, 'stops'])->name('transport-routes.stops');
+        Route::post('transport-routes/{route}/stops', [\App\Http\Controllers\Admin\TransportRouteController::class, 'saveStops'])->name('transport-routes.stops.save');
+        
+        // Transport Vehicles
+        Route::resource('transport-vehicles', \App\Http\Controllers\Admin\TransportVehicleController::class);
+        
+        // Transport Students
+        Route::get('transport-students', [\App\Http\Controllers\Admin\TransportStudentController::class, 'index'])->name('transport-students.index');
+        Route::get('transport-students/assign', [\App\Http\Controllers\Admin\TransportStudentController::class, 'assignForm'])->name('transport-students.assign');
+        Route::post('transport-students/assign', [\App\Http\Controllers\Admin\TransportStudentController::class, 'assign'])->name('transport-students.store');
+        Route::delete('transport-students/{assignment}', [\App\Http\Controllers\Admin\TransportStudentController::class, 'unassign'])->name('transport-students.destroy');
+        Route::get('transport-students/report', [\App\Http\Controllers\Admin\TransportStudentController::class, 'report'])->name('transport-students.report');
+        
+        // Hostel Buildings
+        Route::resource('hostel-buildings', \App\Http\Controllers\Admin\HostelBuildingController::class);
+        
+        // Hostel Rooms
+        Route::resource('hostel-rooms', \App\Http\Controllers\Admin\HostelRoomController::class);
+        Route::get('hostel-rooms/by-building/{building}', [\App\Http\Controllers\Admin\HostelRoomController::class, 'byBuilding'])->name('hostel-rooms.by-building');
+        
+        // Hostel Assignments
+        Route::get('hostel-assignments', [\App\Http\Controllers\Admin\HostelAssignmentController::class, 'index'])->name('hostel-assignments.index');
+        Route::get('hostel-assignments/assign', [\App\Http\Controllers\Admin\HostelAssignmentController::class, 'assignForm'])->name('hostel-assignments.assign');
+        Route::post('hostel-assignments/assign', [\App\Http\Controllers\Admin\HostelAssignmentController::class, 'assign'])->name('hostel-assignments.store');
+        Route::delete('hostel-assignments/{assignment}', [\App\Http\Controllers\Admin\HostelAssignmentController::class, 'unassign'])->name('hostel-assignments.destroy');
+        
+        // Notice Board
+        Route::resource('notices', \App\Http\Controllers\Admin\NoticeController::class);
+        Route::post('notices/{notice}/publish', [\App\Http\Controllers\Admin\NoticeController::class, 'publish'])->name('notices.publish');
+        
+        // Messages
+        Route::get('messages', [\App\Http\Controllers\Admin\MessageController::class, 'index'])->name('messages.index');
+        Route::get('messages/compose', [\App\Http\Controllers\Admin\MessageController::class, 'compose'])->name('messages.compose');
+        Route::post('messages', [\App\Http\Controllers\Admin\MessageController::class, 'send'])->name('messages.send');
+        Route::get('messages/{message}', [\App\Http\Controllers\Admin\MessageController::class, 'show'])->name('messages.show');
+        Route::delete('messages/{message}', [\App\Http\Controllers\Admin\MessageController::class, 'destroy'])->name('messages.destroy');
+        Route::get('messages/sent', [\App\Http\Controllers\Admin\MessageController::class, 'sent'])->name('messages.sent');
+        Route::get('messages/trash', [\App\Http\Controllers\Admin\MessageController::class, 'trash'])->name('messages.trash');
+        
+        // SMS
+        Route::get('sms', [\App\Http\Controllers\Admin\SmsController::class, 'index'])->name('sms.index');
+        Route::get('sms/send', [\App\Http\Controllers\Admin\SmsController::class, 'sendForm'])->name('sms.send');
+        Route::post('sms/send', [\App\Http\Controllers\Admin\SmsController::class, 'send'])->name('sms.store');
+        Route::get('sms/templates', [\App\Http\Controllers\Admin\SmsController::class, 'templates'])->name('sms.templates');
+        Route::post('sms/templates', [\App\Http\Controllers\Admin\SmsController::class, 'saveTemplate'])->name('sms.templates.store');
+        Route::get('sms/settings', [\App\Http\Controllers\Admin\SmsController::class, 'settings'])->name('sms.settings');
+        Route::post('sms/settings', [\App\Http\Controllers\Admin\SmsController::class, 'saveSettings'])->name('sms.settings.store');
+        
+        // Email
+        Route::get('email', [\App\Http\Controllers\Admin\EmailController::class, 'index'])->name('email.index');
+        Route::get('email/compose', [\App\Http\Controllers\Admin\EmailController::class, 'compose'])->name('email.compose');
+        Route::post('email/send', [\App\Http\Controllers\Admin\EmailController::class, 'send'])->name('email.send');
+        Route::get('email/settings', [\App\Http\Controllers\Admin\EmailController::class, 'settings'])->name('email.settings');
+        Route::post('email/settings', [\App\Http\Controllers\Admin\EmailController::class, 'saveSettings'])->name('email.settings.store');
+        
+        // Expense Categories
+        Route::resource('expense-categories', \App\Http\Controllers\Admin\ExpenseCategoryController::class);
+        
+        // Expenses
+        Route::resource('expenses', \App\Http\Controllers\Admin\ExpenseController::class);
+        Route::get('expenses/report', [\App\Http\Controllers\Admin\ExpenseController::class, 'report'])->name('expenses.report');
+        Route::get('expenses/export', [\App\Http\Controllers\Admin\ExpenseController::class, 'export'])->name('expenses.export');
+        
+        // Income Categories
+        Route::resource('income-categories', \App\Http\Controllers\Admin\IncomeCategoryController::class);
+        
+        // Income
+        Route::resource('incomes', \App\Http\Controllers\Admin\IncomeController::class);
+        Route::get('incomes/report', [\App\Http\Controllers\Admin\IncomeController::class, 'report'])->name('incomes.report');
+        
+        // Teachers/Staff
+        Route::resource('teachers', \App\Http\Controllers\Admin\TeacherController::class);
+        Route::get('teachers/{teacher}/profile', [\App\Http\Controllers\Admin\TeacherController::class, 'profile'])->name('teachers.profile');
+        Route::get('teachers/{teacher}/timetable', [\App\Http\Controllers\Admin\TeacherController::class, 'timetable'])->name('teachers.timetable');
+        Route::get('teachers/import', [\App\Http\Controllers\Admin\TeacherController::class, 'importForm'])->name('teachers.import.form');
+        Route::post('teachers/import', [\App\Http\Controllers\Admin\TeacherController::class, 'import'])->name('teachers.import');
+        Route::get('teachers/export', [\App\Http\Controllers\Admin\TeacherController::class, 'export'])->name('teachers.export');
+        
+        // Parents
+        Route::resource('parents', \App\Http\Controllers\Admin\ParentController::class);
+        Route::get('parents/{parent}/children', [\App\Http\Controllers\Admin\ParentController::class, 'children'])->name('parents.children');
+        
+        // Reports
+        Route::prefix('reports')->name('reports.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('index');
+            Route::get('/students', [\App\Http\Controllers\Admin\ReportController::class, 'students'])->name('students');
+            Route::get('/attendance', [\App\Http\Controllers\Admin\ReportController::class, 'attendance'])->name('attendance');
+            Route::get('/exams', [\App\Http\Controllers\Admin\ReportController::class, 'exams'])->name('exams');
+            Route::get('/fees', [\App\Http\Controllers\Admin\ReportController::class, 'fees'])->name('fees');
+            Route::get('/library', [\App\Http\Controllers\Admin\ReportController::class, 'library'])->name('library');
+            Route::get('/transport', [\App\Http\Controllers\Admin\ReportController::class, 'transport'])->name('transport');
+            Route::get('/hostel', [\App\Http\Controllers\Admin\ReportController::class, 'hostel'])->name('hostel');
+            Route::get('/financial', [\App\Http\Controllers\Admin\ReportController::class, 'financial'])->name('financial');
+        });
+        
+        // Settings
+        Route::prefix('settings')->name('settings.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\SettingsController::class, 'index'])->name('index');
+            Route::get('/general', [\App\Http\Controllers\Admin\SettingsController::class, 'general'])->name('general');
+            Route::post('/general', [\App\Http\Controllers\Admin\SettingsController::class, 'saveGeneral'])->name('general.save');
+            Route::get('/school', [\App\Http\Controllers\Admin\SettingsController::class, 'school'])->name('school');
+            Route::post('/school', [\App\Http\Controllers\Admin\SettingsController::class, 'saveSchool'])->name('school.save');
+            Route::get('/academic', [\App\Http\Controllers\Admin\SettingsController::class, 'academic'])->name('academic');
+            Route::post('/academic', [\App\Http\Controllers\Admin\SettingsController::class, 'saveAcademic'])->name('academic.save');
+            Route::get('/fees', [\App\Http\Controllers\Admin\SettingsController::class, 'fees'])->name('fees');
+            Route::post('/fees', [\App\Http\Controllers\Admin\SettingsController::class, 'saveFees'])->name('fees.save');
+            Route::get('/theme', [\App\Http\Controllers\Admin\SettingsController::class, 'theme'])->name('theme');
+            Route::post('/theme', [\App\Http\Controllers\Admin\SettingsController::class, 'saveTheme'])->name('theme.save');
+            Route::get('/translations', [\App\Http\Controllers\Admin\SettingsController::class, 'translations'])->name('translations');
+            Route::post('/translations', [\App\Http\Controllers\Admin\SettingsController::class, 'saveTranslations'])->name('translations.save');
+            Route::get('/notifications', [\App\Http\Controllers\Admin\SettingsController::class, 'notifications'])->name('notifications');
+            Route::post('/notifications', [\App\Http\Controllers\Admin\SettingsController::class, 'saveNotifications'])->name('notifications.save');
+            Route::get('/backups', [\App\Http\Controllers\Admin\SettingsController::class, 'backups'])->name('backups');
+            Route::post('/backups/create', [\App\Http\Controllers\Admin\SettingsController::class, 'createBackup'])->name('backups.create');
+            Route::get('/backups/{backup}/download', [\App\Http\Controllers\Admin\SettingsController::class, 'downloadBackup'])->name('backups.download');
+            Route::delete('/backups/{backup}', [\App\Http\Controllers\Admin\SettingsController::class, 'deleteBackup'])->name('backups.delete');
+            Route::get('/permissions', [\App\Http\Controllers\Admin\SettingsController::class, 'permissions'])->name('permissions');
+            Route::post('/permissions', [\App\Http\Controllers\Admin\SettingsController::class, 'savePermissions'])->name('permissions.save');
+            Route::get('/users', [\App\Http\Controllers\Admin\SettingsController::class, 'users'])->name('users');
+            Route::get('/users/create', [\App\Http\Controllers\Admin\SettingsController::class, 'createUser'])->name('users.create');
+            Route::post('/users', [\App\Http\Controllers\Admin\SettingsController::class, 'storeUser'])->name('users.store');
+            Route::get('/users/{user}/edit', [\App\Http\Controllers\Admin\SettingsController::class, 'editUser'])->name('users.edit');
+            Route::put('/users/{user}', [\App\Http\Controllers\Admin\SettingsController::class, 'updateUser'])->name('users.update');
+            Route::delete('/users/{user}', [\App\Http\Controllers\Admin\SettingsController::class, 'deleteUser'])->name('users.destroy');
+            Route::get('/profile', [\App\Http\Controllers\Admin\SettingsController::class, 'profile'])->name('profile');
+            Route::post('/profile', [\App\Http\Controllers\Admin\SettingsController::class, 'saveProfile'])->name('profile.save');
+            Route::get('/activity-logs', [\App\Http\Controllers\Admin\SettingsController::class, 'activityLogs'])->name('activity-logs');
+            Route::get('/system-info', [\App\Http\Controllers\Admin\SettingsController::class, 'systemInfo'])->name('system-info');
+            Route::get('/maintenance', [\App\Http\Controllers\Admin\SettingsController::class, 'maintenance'])->name('maintenance');
+            Route::post('/maintenance', [\App\Http\Controllers\Admin\SettingsController::class, 'toggleMaintenance'])->name('maintenance.toggle');
+            Route::get('/api', [\App\Http\Controllers\Admin\SettingsController::class, 'api'])->name('api');
+            Route::post('/api/generate-token', [\App\Http\Controllers\Admin\SettingsController::class, 'generateApiToken'])->name('api.generate-token');
+            Route::get('/import-export', [\App\Http\Controllers\Admin\SettingsController::class, 'importExport'])->name('import-export');
+            Route::get('/help', [\App\Http\Controllers\Admin\SettingsController::class, 'help'])->name('help');
+            Route::get('/about', [\App\Http\Controllers\Admin\SettingsController::class, 'about'])->name('about');
+        });
+    });
+
+/*
+|--------------------------------------------------------------------------
+| Teacher Routes
+|--------------------------------------------------------------------------
+*/
+Route::prefix('teacher')
+    ->name('teacher.')
+    ->middleware(['auth', 'verified', 'role:teacher'])
+    ->group(function () {
+        
+        // Dashboard
+        Route::get('/dashboard', [\App\Http\Controllers\Teacher\DashboardController::class, 'index'])->name('dashboard');
+        
+        // My Classes
+        Route::get('/classes', [\App\Http\Controllers\Teacher\ClassController::class, 'index'])->name('classes.index');
+        Route::get('/classes/{class}/section/{section}', [\App\Http\Controllers\Teacher\ClassController::class, 'show'])->name('classes.show');
+        Route::get('/classes/{class}/section/{section}/students', [\App\Http\Controllers\Teacher\ClassController::class, 'students'])->name('classes.students');
+        
+        // Timetable
+        Route::get('/timetable', [\App\Http\Controllers\Teacher\TimetableController::class, 'index'])->name('timetable.index');
+        Route::get('/timetable/print', [\App\Http\Controllers\Teacher\TimetableController::class, 'print'])->name('timetable.print');
+        
+        // Attendance
+        Route::get('/attendance', [\App\Http\Controllers\Teacher\AttendanceController::class, 'index'])->name('attendance.index');
+        Route::get('/attendance/mark', [\App\Http\Controllers\Teacher\AttendanceController::class, 'markForm'])->name('attendance.mark');
+        Route::post('/attendance/mark', [\App\Http\Controllers\Teacher\AttendanceController::class, 'mark'])->name('attendance.store');
+        Route::get('/attendance/{attendance}/edit', [\App\Http\Controllers\Teacher\AttendanceController::class, 'edit'])->name('attendance.edit');
+        Route::put('/attendance/{attendance}', [\App\Http\Controllers\Teacher\AttendanceController::class, 'update'])->name('attendance.update');
+        Route::get('/attendance/report', [\App\Http\Controllers\Teacher\AttendanceController::class, 'report'])->name('attendance.report');
+        
+        // Exams
+        Route::get('/exams', [\App\Http\Controllers\Teacher\ExamController::class, 'index'])->name('exams.index');
+        Route::get('/exams/{exam}', [\App\Http\Controllers\Teacher\ExamController::class, 'show'])->name('exams.show');
+        Route::get('/exams/{exam}/marks', [\App\Http\Controllers\Teacher\ExamController::class, 'marksForm'])->name('exams.marks');
+        Route::post('/exams/{exam}/marks', [\App\Http\Controllers\Teacher\ExamController::class, 'saveMarks'])->name('exams.marks.store');
+        Route::get('/exams/{exam}/attendance', [\App\Http\Controllers\Teacher\ExamController::class, 'attendanceForm'])->name('exams.attendance');
+        Route::post('/exams/{exam}/attendance', [\App\Http\Controllers\Teacher\ExamController::class, 'saveAttendance'])->name('exams.attendance.store');
+        
+        // Students
+        Route::get('/students', [\App\Http\Controllers\Teacher\StudentController::class, 'index'])->name('students.index');
+        Route::get('/students/{student}', [\App\Http\Controllers\Teacher\StudentController::class, 'show'])->name('students.show');
+        Route::get('/students/{student}/attendance', [\App\Http\Controllers\Teacher\StudentController::class, 'attendance'])->name('students.attendance');
+        Route::get('/students/{student}/marks', [\App\Http\Controllers\Teacher\StudentController::class, 'marks'])->name('students.marks');
+        
+        // Messages
+        Route::get('/messages', [\App\Http\Controllers\Teacher\MessageController::class, 'index'])->name('messages.index');
+        Route::get('/messages/compose', [\App\Http\Controllers\Teacher\MessageController::class, 'compose'])->name('messages.compose');
+        Route::post('/messages', [\App\Http\Controllers\Teacher\MessageController::class, 'send'])->name('messages.send');
+        Route::get('/messages/{message}', [\App\Http\Controllers\Teacher\MessageController::class, 'show'])->name('messages.show');
+        
+        // Notices
+        Route::get('/notices', [\App\Http\Controllers\Teacher\NoticeController::class, 'index'])->name('notices.index');
+        Route::get('/notices/{notice}', [\App\Http\Controllers\Teacher\NoticeController::class, 'show'])->name('notices.show');
+        
+        // Profile
+        Route::get('/profile', [\App\Http\Controllers\Teacher\ProfileController::class, 'index'])->name('profile.index');
+        Route::get('/profile/edit', [\App\Http\Controllers\Teacher\ProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('/profile', [\App\Http\Controllers\Teacher\ProfileController::class, 'update'])->name('profile.update');
+    });
+
+/*
+|--------------------------------------------------------------------------
+| Student Routes
+|--------------------------------------------------------------------------
+*/
+Route::prefix('student')
+    ->name('student.')
+    ->middleware(['auth', 'verified', 'role:student'])
+    ->group(function () {
+        
+        // Dashboard
+        Route::get('/dashboard', [\App\Http\Controllers\Student\DashboardController::class, 'index'])->name('dashboard');
+        
+        // Profile
+        Route::get('/profile', [\App\Http\Controllers\Student\ProfileController::class, 'index'])->name('profile.index');
+        Route::get('/profile/edit', [\App\Http\Controllers\Student\ProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('/profile', [\App\Http\Controllers\Student\ProfileController::class, 'update'])->name('profile.update');
+        
+        // Attendance
+        Route::get('/attendance', [\App\Http\Controllers\Student\AttendanceController::class, 'index'])->name('attendance.index');
+        Route::get('/attendance/calendar', [\App\Http\Controllers\Student\AttendanceController::class, 'calendar'])->name('attendance.calendar');
+        
+        // Exams
+        Route::get('/exams', [\App\Http\Controllers\Student\ExamController::class, 'index'])->name('exams.index');
+        Route::get('/exams/{exam}', [\App\Http\Controllers\Student\ExamController::class, 'show'])->name('exams.show');
+        Route::get('/exams/{exam}/results', [\App\Http\Controllers\Student\ExamController::class, 'results'])->name('exams.results');
+        Route::get('/exams/{exam}/results/print', [\App\Http\Controllers\Student\ExamController::class, 'printResults'])->name('exams.results.print');
+        
+        // Fees
+        Route::get('/fees', [\App\Http\Controllers\Student\FeesController::class, 'index'])->name('fees.index');
+        Route::get('/fees/{transaction}/receipt', [\App\Http\Controllers\Student\FeesController::class, 'receipt'])->name('fees.receipt');
+        Route::get('/fees/pay', [\App\Http\Controllers\Student\FeesController::class, 'payForm'])->name('fees.pay');
+        Route::post('/fees/pay', [\App\Http\Controllers\Student\FeesController::class, 'pay'])->name('fees.pay.store');
+        
+        // Timetable
+        Route::get('/timetable', [\App\Http\Controllers\Student\TimetableController::class, 'index'])->name('timetable.index');
+        Route::get('/timetable/print', [\App\Http\Controllers\Student\TimetableController::class, 'print'])->name('timetable.print');
+        
+        // Library
+        Route::get('/library', [\App\Http\Controllers\Student\LibraryController::class, 'index'])->name('library.index');
+        Route::get('/library/books', [\App\Http\Controllers\Student\LibraryController::class, 'books'])->name('library.books');
+        Route::get('/library/issued', [\App\Http\Controllers\Student\LibraryController::class, 'issued'])->name('library.issued');
+        
+        // Transport
+        Route::get('/transport', [\App\Http\Controllers\Student\TransportController::class, 'index'])->name('transport.index');
+        
+        // Hostel
+        Route::get('/hostel', [\App\Http\Controllers\Student\HostelController::class, 'index'])->name('hostel.index');
+        
+        // Notices
+        Route::get('/notices', [\App\Http\Controllers\Student\NoticeController::class, 'index'])->name('notices.index');
+        Route::get('/notices/{notice}', [\App\Http\Controllers\Student\NoticeController::class, 'show'])->name('notices.show');
+        
+        // Messages
+        Route::get('/messages', [\App\Http\Controllers\Student\MessageController::class, 'index'])->name('messages.index');
+        Route::get('/messages/{message}', [\App\Http\Controllers\Student\MessageController::class, 'show'])->name('messages.show');
+        
+        // Documents
+        Route::get('/documents', [\App\Http\Controllers\Student\DocumentController::class, 'index'])->name('documents.index');
+        Route::get('/documents/{document}/download', [\App\Http\Controllers\Student\DocumentController::class, 'download'])->name('documents.download');
+    });
+
+/*
+|--------------------------------------------------------------------------
+| Parent Routes
+|--------------------------------------------------------------------------
+*/
+Route::prefix('parent')
+    ->name('parent.')
+    ->middleware(['auth', 'verified', 'role:parent'])
+    ->group(function () {
+        
+        // Dashboard
+        Route::get('/dashboard', [\App\Http\Controllers\ParentUser\DashboardController::class, 'index'])->name('dashboard');
+        
+        // Children
+        Route::get('/children', [\App\Http\Controllers\ParentUser\ChildController::class, 'index'])->name('children.index');
+        Route::get('/children/{student}', [\App\Http\Controllers\ParentUser\ChildController::class, 'show'])->name('children.show');
+        Route::get('/children/{student}/attendance', [\App\Http\Controllers\ParentUser\ChildController::class, 'attendance'])->name('children.attendance');
+        Route::get('/children/{student}/exams', [\App\Http\Controllers\ParentUser\ChildController::class, 'exams'])->name('children.exams');
+        Route::get('/children/{student}/fees', [\App\Http\Controllers\ParentUser\ChildController::class, 'fees'])->name('children.fees');
+        Route::get('/children/{student}/timetable', [\App\Http\Controllers\ParentUser\ChildController::class, 'timetable'])->name('children.timetable');
+        
+        // Fees Payment
+        Route::get('/fees', [\App\Http\Controllers\ParentUser\FeesController::class, 'index'])->name('fees.index');
+        Route::get('/fees/pay/{student}', [\App\Http\Controllers\ParentUser\FeesController::class, 'payForm'])->name('fees.pay');
+        Route::post('/fees/pay/{student}', [\App\Http\Controllers\ParentUser\FeesController::class, 'pay'])->name('fees.pay.store');
+        Route::get('/fees/receipt/{transaction}', [\App\Http\Controllers\ParentUser\FeesController::class, 'receipt'])->name('fees.receipt');
+        
+        // Notices
+        Route::get('/notices', [\App\Http\Controllers\ParentUser\NoticeController::class, 'index'])->name('notices.index');
+        Route::get('/notices/{notice}', [\App\Http\Controllers\ParentUser\NoticeController::class, 'show'])->name('notices.show');
+        
+        // Messages
+        Route::get('/messages', [\App\Http\Controllers\ParentUser\MessageController::class, 'index'])->name('messages.index');
+        Route::get('/messages/compose', [\App\Http\Controllers\ParentUser\MessageController::class, 'compose'])->name('messages.compose');
+        Route::post('/messages', [\App\Http\Controllers\ParentUser\MessageController::class, 'send'])->name('messages.send');
+        Route::get('/messages/{message}', [\App\Http\Controllers\ParentUser\MessageController::class, 'show'])->name('messages.show');
+        
+        // Profile
+        Route::get('/profile', [\App\Http\Controllers\ParentUser\ProfileController::class, 'index'])->name('profile.index');
+        Route::get('/profile/edit', [\App\Http\Controllers\ParentUser\ProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('/profile', [\App\Http\Controllers\ParentUser\ProfileController::class, 'update'])->name('profile.update');
+    });
+
+/*
+|--------------------------------------------------------------------------
+| Accountant Routes
+|--------------------------------------------------------------------------
+*/
+Route::prefix('accountant')
+    ->name('accountant.')
+    ->middleware(['auth', 'verified', 'role:accountant'])
+    ->group(function () {
+        
+        // Dashboard
+        Route::get('/dashboard', [\App\Http\Controllers\Accountant\DashboardController::class, 'index'])->name('dashboard');
+        
+        // Fees Collection
+        Route::get('/fees-collection', [\App\Http\Controllers\Accountant\FeesCollectionController::class, 'index'])->name('fees-collection.index');
+        Route::get('/fees-collection/collect/{student}', [\App\Http\Controllers\Accountant\FeesCollectionController::class, 'collectForm'])->name('fees-collection.collect');
+        Route::post('/fees-collection/collect/{student}', [\App\Http\Controllers\Accountant\FeesCollectionController::class, 'collect'])->name('fees-collection.store');
+        Route::get('/fees-collection/receipt/{transaction}', [\App\Http\Controllers\Accountant\FeesCollectionController::class, 'receipt'])->name('fees-collection.receipt');
+        Route::get('/fees-collection/search', [\App\Http\Controllers\Accountant\FeesCollectionController::class, 'search'])->name('fees-collection.search');
+        
+        // Fees Reports
+        Route::get('/fees-reports', [\App\Http\Controllers\Accountant\FeesReportController::class, 'index'])->name('fees-reports.index');
+        Route::get('/fees-reports/collection', [\App\Http\Controllers\Accountant\FeesReportController::class, 'collection'])->name('fees-reports.collection');
+        Route::get('/fees-reports/due', [\App\Http\Controllers\Accountant\FeesReportController::class, 'due'])->name('fees-reports.due');
+        Route::get('/fees-reports/defaulters', [\App\Http\Controllers\Accountant\FeesReportController::class, 'defaulters'])->name('fees-reports.defaulters');
+        Route::get('/fees-reports/export', [\App\Http\Controllers\Accountant\FeesReportController::class, 'export'])->name('fees-reports.export');
+        
+        // Expenses
+        Route::resource('expenses', \App\Http\Controllers\Accountant\ExpenseController::class);
+        Route::get('/expenses-report', [\App\Http\Controllers\Accountant\ExpenseController::class, 'report'])->name('expenses.report');
+        
+        // Income
+        Route::resource('incomes', \App\Http\Controllers\Accountant\IncomeController::class);
+        Route::get('/incomes-report', [\App\Http\Controllers\Accountant\IncomeController::class, 'report'])->name('incomes.report');
+        
+        // Financial Reports
+        Route::get('/financial-reports', [\App\Http\Controllers\Accountant\FinancialReportController::class, 'index'])->name('financial-reports.index');
+        Route::get('/financial-reports/profit-loss', [\App\Http\Controllers\Accountant\FinancialReportController::class, 'profitLoss'])->name('financial-reports.profit-loss');
+        Route::get('/financial-reports/balance-sheet', [\App\Http\Controllers\Accountant\FinancialReportController::class, 'balanceSheet'])->name('financial-reports.balance-sheet');
+        
+        // Profile
+        Route::get('/profile', [\App\Http\Controllers\Accountant\ProfileController::class, 'index'])->name('profile.index');
+        Route::get('/profile/edit', [\App\Http\Controllers\Accountant\ProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('/profile', [\App\Http\Controllers\Accountant\ProfileController::class, 'update'])->name('profile.update');
+    });
+
+/*
+|--------------------------------------------------------------------------
+| Librarian Routes
+|--------------------------------------------------------------------------
+*/
+Route::prefix('librarian')
+    ->name('librarian.')
+    ->middleware(['auth', 'verified', 'role:librarian'])
+    ->group(function () {
+        
+        // Dashboard
+        Route::get('/dashboard', [\App\Http\Controllers\Librarian\DashboardController::class, 'index'])->name('dashboard');
+        
+        // Books
+        Route::resource('books', \App\Http\Controllers\Librarian\BookController::class);
+        Route::get('/books-search', [\App\Http\Controllers\Librarian\BookController::class, 'search'])->name('books.search');
+        
+        // Categories
+        Route::resource('categories', \App\Http\Controllers\Librarian\CategoryController::class);
+        
+        // Members
+        Route::resource('members', \App\Http\Controllers\Librarian\MemberController::class);
+        Route::get('/members/{member}/card', [\App\Http\Controllers\Librarian\MemberController::class, 'card'])->name('members.card');
+        
+        // Issue/Return
+        Route::get('/issues', [\App\Http\Controllers\Librarian\IssueController::class, 'index'])->name('issues.index');
+        Route::get('/issues/issue', [\App\Http\Controllers\Librarian\IssueController::class, 'issueForm'])->name('issues.issue');
+        Route::post('/issues/issue', [\App\Http\Controllers\Librarian\IssueController::class, 'issue'])->name('issues.store');
+        Route::get('/issues/{issue}/return', [\App\Http\Controllers\Librarian\IssueController::class, 'returnForm'])->name('issues.return');
+        Route::post('/issues/{issue}/return', [\App\Http\Controllers\Librarian\IssueController::class, 'returnBook'])->name('issues.return.store');
+        Route::get('/issues/overdue', [\App\Http\Controllers\Librarian\IssueController::class, 'overdue'])->name('issues.overdue');
+        
+        // Reports
+        Route::get('/reports', [\App\Http\Controllers\Librarian\ReportController::class, 'index'])->name('reports.index');
+        Route::get('/reports/circulation', [\App\Http\Controllers\Librarian\ReportController::class, 'circulation'])->name('reports.circulation');
+        Route::get('/reports/overdue', [\App\Http\Controllers\Librarian\ReportController::class, 'overdue'])->name('reports.overdue');
+        Route::get('/reports/popular', [\App\Http\Controllers\Librarian\ReportController::class, 'popular'])->name('reports.popular');
+        
+        // Profile
+        Route::get('/profile', [\App\Http\Controllers\Librarian\ProfileController::class, 'index'])->name('profile.index');
+        Route::get('/profile/edit', [\App\Http\Controllers\Librarian\ProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('/profile', [\App\Http\Controllers\Librarian\ProfileController::class, 'update'])->name('profile.update');
+    });
+
+/*
+|--------------------------------------------------------------------------
+| File Upload/Download Routes (Common)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])->group(function () {
+    // File Uploads (Prompt 300)
+    Route::post('/uploads', [UploadController::class, 'store'])->name('uploads.store');
+    Route::delete('/uploads/{path}', [UploadController::class, 'destroy'])->name('uploads.destroy')->where('path', '.*');
+    Route::post('/uploads/tinymce', [UploadController::class, 'tinymce'])->name('uploads.tinymce');
+    
+    // File Downloads (Prompt 301)
+    Route::get('/downloads/{path}', [DownloadController::class, 'download'])->name('downloads.download')->where('path', '.*');
+    Route::get('/media/{path}', [DownloadController::class, 'media'])->name('media.show')->where('path', '.*');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Locale Switcher
+|--------------------------------------------------------------------------
+*/
+Route::post('/locale', function (\Illuminate\Http\Request $request) {
+    $locale = $request->input('locale', 'en');
+    
+    if (in_array($locale, ['en', 'hi', 'ar'])) {
+        session(['locale' => $locale]);
+        
+        if (auth()->check()) {
+            auth()->user()->update(['locale' => $locale]);
+        }
+    }
+    
+    return back();
+})->name('locale.switch');
+
+/*
+|--------------------------------------------------------------------------
+| Fallback Route (404)
+|--------------------------------------------------------------------------
+*/
+Route::fallback(function () {
+    return response()->view('errors.404', [], 404);
+})->name('fallback');
 
 // Named route aliases for attendance views (temporary - remove after backend is implemented)
 Route::middleware(['auth'])->group(function () {
