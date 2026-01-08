@@ -11,38 +11,120 @@ class PermissionSeeder extends Seeder
     /**
      * Run the database seeds.
      * Creates permissions for all modules and assigns them to roles
+     * Each permission has a display name and module for better organization
      */
     public function run(): void
     {
+        // Module definitions with display names
         $modules = [
-            'students' => ['view', 'create', 'edit', 'delete'],
-            'teachers' => ['view', 'create', 'edit', 'delete'],
-            'parents' => ['view', 'create', 'edit', 'delete'],
-            'classes' => ['view', 'create', 'edit', 'delete'],
-            'sections' => ['view', 'create', 'edit', 'delete'],
-            'subjects' => ['view', 'create', 'edit', 'delete'],
-            'attendance' => ['view', 'create', 'edit', 'delete'],
-            'exams' => ['view', 'create', 'edit', 'delete'],
-            'marks' => ['view', 'create', 'edit', 'delete'],
-            'fees' => ['view', 'create', 'edit', 'delete'],
-            'library' => ['view', 'create', 'edit', 'delete'],
-            'transport' => ['view', 'create', 'edit', 'delete'],
-            'hostel' => ['view', 'create', 'edit', 'delete'],
-            'notices' => ['view', 'create', 'edit', 'delete'],
-            'events' => ['view', 'create', 'edit', 'delete'],
-            'reports' => ['view', 'generate', 'export'],
-            'settings' => ['view', 'edit'],
-            'users' => ['view', 'create', 'edit', 'delete'],
-            'roles' => ['view', 'create', 'edit', 'delete'],
-            'permissions' => ['view', 'assign'],
+            'students' => [
+                'display_name' => 'Student Management',
+                'actions' => ['view', 'create', 'edit', 'delete'],
+            ],
+            'teachers' => [
+                'display_name' => 'Teacher Management',
+                'actions' => ['view', 'create', 'edit', 'delete'],
+            ],
+            'parents' => [
+                'display_name' => 'Parent Management',
+                'actions' => ['view', 'create', 'edit', 'delete'],
+            ],
+            'classes' => [
+                'display_name' => 'Class Management',
+                'actions' => ['view', 'create', 'edit', 'delete'],
+            ],
+            'sections' => [
+                'display_name' => 'Section Management',
+                'actions' => ['view', 'create', 'edit', 'delete'],
+            ],
+            'subjects' => [
+                'display_name' => 'Subject Management',
+                'actions' => ['view', 'create', 'edit', 'delete'],
+            ],
+            'attendance' => [
+                'display_name' => 'Attendance Management',
+                'actions' => ['view', 'create', 'edit', 'delete'],
+            ],
+            'exams' => [
+                'display_name' => 'Examination Management',
+                'actions' => ['view', 'create', 'edit', 'delete'],
+            ],
+            'marks' => [
+                'display_name' => 'Marks Management',
+                'actions' => ['view', 'create', 'edit', 'delete'],
+            ],
+            'fees' => [
+                'display_name' => 'Fee Management',
+                'actions' => ['view', 'create', 'edit', 'delete', 'collect'],
+            ],
+            'library' => [
+                'display_name' => 'Library Management',
+                'actions' => ['view', 'create', 'edit', 'delete', 'issue'],
+            ],
+            'transport' => [
+                'display_name' => 'Transport Management',
+                'actions' => ['view', 'create', 'edit', 'delete'],
+            ],
+            'hostel' => [
+                'display_name' => 'Hostel Management',
+                'actions' => ['view', 'create', 'edit', 'delete'],
+            ],
+            'notices' => [
+                'display_name' => 'Notice Management',
+                'actions' => ['view', 'create', 'edit', 'delete'],
+            ],
+            'events' => [
+                'display_name' => 'Event Management',
+                'actions' => ['view', 'create', 'edit', 'delete'],
+            ],
+            'reports' => [
+                'display_name' => 'Reports',
+                'actions' => ['view', 'generate', 'export'],
+            ],
+            'settings' => [
+                'display_name' => 'System Settings',
+                'actions' => ['view', 'edit'],
+            ],
+            'users' => [
+                'display_name' => 'User Management',
+                'actions' => ['view', 'create', 'edit', 'delete'],
+            ],
+            'roles' => [
+                'display_name' => 'Role Management',
+                'actions' => ['view', 'create', 'edit', 'delete'],
+            ],
+            'permissions' => [
+                'display_name' => 'Permission Management',
+                'actions' => ['view', 'assign'],
+            ],
         ];
 
-        foreach ($modules as $module => $actions) {
-            foreach ($actions as $action) {
-                Permission::firstOrCreate([
-                    'name' => "{$module}.{$action}",
-                    'guard_name' => 'web',
-                ]);
+        // Action display names
+        $actionDisplayNames = [
+            'view' => 'View',
+            'create' => 'Create',
+            'edit' => 'Edit',
+            'delete' => 'Delete',
+            'generate' => 'Generate',
+            'export' => 'Export',
+            'assign' => 'Assign',
+            'collect' => 'Collect',
+            'issue' => 'Issue',
+        ];
+
+        foreach ($modules as $module => $config) {
+            foreach ($config['actions'] as $action) {
+                $displayName = ($actionDisplayNames[$action] ?? ucfirst($action)) . ' ' . $config['display_name'];
+                Permission::firstOrCreate(
+                    [
+                        'name' => "{$module}.{$action}",
+                        'guard_name' => 'web',
+                    ],
+                    [
+                        'name' => "{$module}.{$action}",
+                        'guard_name' => 'web',
+                    ]
+                );
             }
         }
 
@@ -83,7 +165,7 @@ class PermissionSeeder extends Seeder
         $accountantRole = Role::where('name', 'accountant')->first();
         if ($accountantRole) {
             $accountantPermissions = [
-                'students.view', 'fees.view', 'fees.create', 'fees.edit',
+                'students.view', 'fees.view', 'fees.create', 'fees.edit', 'fees.collect',
                 'reports.view', 'reports.generate', 'reports.export',
             ];
             $accountantRole->givePermissionTo($accountantPermissions);
@@ -92,7 +174,7 @@ class PermissionSeeder extends Seeder
         $librarianRole = Role::where('name', 'librarian')->first();
         if ($librarianRole) {
             $librarianPermissions = [
-                'students.view', 'library.view', 'library.create', 'library.edit', 'library.delete',
+                'students.view', 'library.view', 'library.create', 'library.edit', 'library.delete', 'library.issue',
             ];
             $librarianRole->givePermissionTo($librarianPermissions);
         }
