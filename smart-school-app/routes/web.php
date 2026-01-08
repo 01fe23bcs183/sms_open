@@ -1165,4 +1165,339 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/fee-fines/{id}', fn($id) => back()->with('success', 'Fine rule deleted!'))->name('fee-fines.destroy');
 });
 
+// Named route aliases for Session 21 library views (temporary - remove after backend is implemented)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/library/categories', fn() => redirect('/test-library/categories'))->name('library.categories.index');
+    Route::get('/library/categories/create', fn() => redirect('/test-library/categories/create'))->name('library.categories.create');
+    Route::post('/library/categories', fn() => back()->with('success', 'Category created!'))->name('library.categories.store');
+    Route::get('/library/categories/{id}/edit', fn($id) => redirect('/test-library/categories'))->name('library.categories.edit');
+    Route::put('/library/categories/{id}', fn($id) => back()->with('success', 'Category updated!'))->name('library.categories.update');
+    Route::delete('/library/categories/{id}', fn($id) => back()->with('success', 'Category deleted!'))->name('library.categories.destroy');
+    
+    Route::get('/library/books', fn() => redirect('/test-library/books'))->name('library.books.index');
+    Route::get('/library/books/create', fn() => redirect('/test-library/books/create'))->name('library.books.create');
+    Route::post('/library/books', fn() => back()->with('success', 'Book created!'))->name('library.books.store');
+    Route::get('/library/books/{id}', fn($id) => redirect('/test-library/books/show'))->name('library.books.show');
+    Route::get('/library/books/{id}/edit', fn($id) => redirect('/test-library/books'))->name('library.books.edit');
+    Route::put('/library/books/{id}', fn($id) => back()->with('success', 'Book updated!'))->name('library.books.update');
+    Route::delete('/library/books/{id}', fn($id) => back()->with('success', 'Book deleted!'))->name('library.books.destroy');
+    
+    Route::get('/library/members', fn() => redirect('/test-library/members'))->name('library.members.index');
+    Route::get('/library/members/create', fn() => redirect('/test-library/members/create'))->name('library.members.create');
+    Route::post('/library/members', fn() => back()->with('success', 'Member created!'))->name('library.members.store');
+    Route::get('/library/members/{id}/edit', fn($id) => redirect('/test-library/members'))->name('library.members.edit');
+    Route::put('/library/members/{id}', fn($id) => back()->with('success', 'Member updated!'))->name('library.members.update');
+    Route::delete('/library/members/{id}', fn($id) => back()->with('success', 'Member deleted!'))->name('library.members.destroy');
+    
+    Route::get('/library/issues', fn() => redirect('/test-library/issues'))->name('library.issues.index');
+    Route::get('/library/issues/create', fn() => redirect('/test-library/issues/create'))->name('library.issues.create');
+    Route::post('/library/issues', fn() => back()->with('success', 'Book issued!'))->name('library.issues.store');
+    Route::delete('/library/issues/{id}', fn($id) => back()->with('success', 'Issue deleted!'))->name('library.issues.destroy');
+    
+    Route::get('/library/returns/create', fn() => redirect('/test-library/returns/create'))->name('library.returns.create');
+    Route::post('/library/returns', fn() => back()->with('success', 'Book returned!'))->name('library.returns.store');
+});
+
+// Temporary test routes for Session 21 library views (remove after testing)
+Route::prefix('test-library')->middleware(['auth'])->group(function () {
+    Route::get('/categories', function () {
+        return view('admin.library.categories', [
+            'categories' => collect([
+                (object)['id' => 1, 'name' => 'Fiction', 'code' => 'FIC', 'description' => 'Fictional literature and novels', 'books_count' => 150, 'is_active' => true],
+                (object)['id' => 2, 'name' => 'Non-Fiction', 'code' => 'NF', 'description' => 'Non-fictional works including biographies', 'books_count' => 120, 'is_active' => true],
+                (object)['id' => 3, 'name' => 'Science', 'code' => 'SCI', 'description' => 'Science and technology books', 'books_count' => 85, 'is_active' => true],
+                (object)['id' => 4, 'name' => 'History', 'code' => 'HIS', 'description' => 'Historical books and references', 'books_count' => 60, 'is_active' => true],
+                (object)['id' => 5, 'name' => 'Mathematics', 'code' => 'MATH', 'description' => 'Mathematics textbooks and references', 'books_count' => 45, 'is_active' => false],
+            ]),
+            'statistics' => (object)[
+                'total' => 5,
+                'active' => 4,
+                'inactive' => 1,
+                'total_books' => 460,
+            ],
+        ]);
+    })->name('test.library.categories');
+
+    Route::get('/categories/create', function () {
+        return view('admin.library.categories-create');
+    })->name('test.library.categories.create');
+
+    Route::get('/books', function () {
+        return view('admin.library.books', [
+            'books' => collect([
+                (object)[
+                    'id' => 1, 
+                    'title' => 'To Kill a Mockingbird', 
+                    'author' => 'Harper Lee',
+                    'isbn' => '978-0-06-112008-4',
+                    'category' => (object)['id' => 1, 'name' => 'Fiction'],
+                    'publisher' => 'J. B. Lippincott & Co.',
+                    'quantity' => 5,
+                    'available_quantity' => 3,
+                    'price' => 450,
+                    'cover_image' => null,
+                    'is_active' => true
+                ],
+                (object)[
+                    'id' => 2, 
+                    'title' => 'A Brief History of Time', 
+                    'author' => 'Stephen Hawking',
+                    'isbn' => '978-0-553-38016-3',
+                    'category' => (object)['id' => 3, 'name' => 'Science'],
+                    'publisher' => 'Bantam Dell',
+                    'quantity' => 3,
+                    'available_quantity' => 0,
+                    'price' => 550,
+                    'cover_image' => null,
+                    'is_active' => true
+                ],
+                (object)[
+                    'id' => 3, 
+                    'title' => 'The Great Gatsby', 
+                    'author' => 'F. Scott Fitzgerald',
+                    'isbn' => '978-0-7432-7356-5',
+                    'category' => (object)['id' => 1, 'name' => 'Fiction'],
+                    'publisher' => 'Scribner',
+                    'quantity' => 4,
+                    'available_quantity' => 2,
+                    'price' => 350,
+                    'cover_image' => null,
+                    'is_active' => true
+                ],
+            ]),
+            'categories' => collect([
+                (object)['id' => 1, 'name' => 'Fiction'],
+                (object)['id' => 2, 'name' => 'Non-Fiction'],
+                (object)['id' => 3, 'name' => 'Science'],
+            ]),
+            'statistics' => (object)[
+                'total' => 12,
+                'available' => 8,
+                'issued' => 4,
+                'categories' => 5,
+            ],
+        ]);
+    })->name('test.library.books');
+
+    Route::get('/books/create', function () {
+        return view('admin.library.books-create', [
+            'categories' => collect([
+                (object)['id' => 1, 'name' => 'Fiction'],
+                (object)['id' => 2, 'name' => 'Non-Fiction'],
+                (object)['id' => 3, 'name' => 'Science'],
+                (object)['id' => 4, 'name' => 'History'],
+                (object)['id' => 5, 'name' => 'Mathematics'],
+            ]),
+        ]);
+    })->name('test.library.books.create');
+
+    Route::get('/books/show', function () {
+        return view('admin.library.books-show', [
+            'book' => (object)[
+                'id' => 1, 
+                'title' => 'To Kill a Mockingbird', 
+                'author' => 'Harper Lee',
+                'isbn' => '978-0-06-112008-4',
+                'category' => (object)['id' => 1, 'name' => 'Fiction'],
+                'publisher' => 'J. B. Lippincott & Co.',
+                'edition' => '50th Anniversary Edition',
+                'publish_year' => 2010,
+                'language' => 'English',
+                'pages' => 336,
+                'quantity' => 5,
+                'available_quantity' => 3,
+                'price' => 450,
+                'rack_number' => 'A-12',
+                'cover_image' => null,
+                'description' => 'A classic novel of modern American literature.',
+                'is_active' => true,
+                'created_at' => now()->subMonths(6),
+            ],
+            'currentIssues' => collect([
+                (object)[
+                    'id' => 1,
+                    'member' => (object)['name' => 'John Doe', 'membership_number' => 'LIB001'],
+                    'issue_date' => now()->subDays(10)->format('Y-m-d'),
+                    'due_date' => now()->addDays(4)->format('Y-m-d'),
+                    'is_overdue' => false,
+                    'days_overdue' => 0,
+                ],
+                (object)[
+                    'id' => 2,
+                    'member' => (object)['name' => 'Jane Smith', 'membership_number' => 'LIB002'],
+                    'issue_date' => now()->subDays(20)->format('Y-m-d'),
+                    'due_date' => now()->subDays(6)->format('Y-m-d'),
+                    'is_overdue' => true,
+                    'days_overdue' => 6,
+                ],
+            ]),
+            'issueHistory' => collect([
+                (object)[
+                    'id' => 3,
+                    'member' => (object)['name' => 'Bob Wilson', 'membership_number' => 'LIB003'],
+                    'issue_date' => now()->subMonths(2)->format('Y-m-d'),
+                    'due_date' => now()->subMonths(2)->addDays(14)->format('Y-m-d'),
+                    'return_date' => now()->subMonths(2)->addDays(12)->format('Y-m-d'),
+                    'fine_amount' => 0,
+                ],
+            ]),
+            'statistics' => [
+                'total_issues' => 25,
+                'total_returns' => 23,
+                'avg_duration' => 12,
+                'overdue_count' => 3,
+                'total_fines' => 150,
+            ],
+            'monthlyIssues' => [
+                ['month' => 'Aug', 'count' => 3],
+                ['month' => 'Sep', 'count' => 5],
+                ['month' => 'Oct', 'count' => 4],
+                ['month' => 'Nov', 'count' => 6],
+                ['month' => 'Dec', 'count' => 4],
+                ['month' => 'Jan', 'count' => 3],
+            ],
+        ]);
+    })->name('test.library.books.show');
+
+    Route::get('/members', function () {
+        return view('admin.library.members', [
+            'members' => collect([
+                (object)[
+                    'id' => 1,
+                    'name' => 'John Doe',
+                    'email' => 'john.doe@school.com',
+                    'membership_number' => 'LIB001',
+                    'member_type' => 'student',
+                    'class_department' => 'Class 10-A',
+                    'books_issued' => 2,
+                    'max_books' => 5,
+                    'membership_date' => now()->subMonths(6)->format('Y-m-d'),
+                    'expiry_date' => now()->addMonths(6)->format('Y-m-d'),
+                    'is_active' => true,
+                ],
+                (object)[
+                    'id' => 2,
+                    'name' => 'Jane Smith',
+                    'email' => 'jane.smith@school.com',
+                    'membership_number' => 'LIB002',
+                    'member_type' => 'teacher',
+                    'class_department' => 'Science Department',
+                    'books_issued' => 5,
+                    'max_books' => 10,
+                    'membership_date' => now()->subYear()->format('Y-m-d'),
+                    'expiry_date' => now()->addYear()->format('Y-m-d'),
+                    'is_active' => true,
+                ],
+                (object)[
+                    'id' => 3,
+                    'name' => 'Bob Wilson',
+                    'email' => 'bob.wilson@school.com',
+                    'membership_number' => 'LIB003',
+                    'member_type' => 'staff',
+                    'class_department' => 'Administration',
+                    'books_issued' => 1,
+                    'max_books' => 5,
+                    'membership_date' => now()->subMonths(3)->format('Y-m-d'),
+                    'expiry_date' => now()->subDays(10)->format('Y-m-d'),
+                    'is_active' => true,
+                ],
+            ]),
+        ]);
+    })->name('test.library.members');
+
+    Route::get('/members/create', function () {
+        return view('admin.library.members-create', [
+            'students' => collect([
+                (object)['id' => 1, 'name' => 'Alice Brown', 'admission_no' => 'ADM001', 'class_name' => 'Class 10-A', 'email' => 'alice@school.com'],
+                (object)['id' => 2, 'name' => 'Charlie Davis', 'admission_no' => 'ADM002', 'class_name' => 'Class 9-B', 'email' => 'charlie@school.com'],
+            ]),
+            'teachers' => collect([
+                (object)['id' => 1, 'name' => 'Dr. Emily White', 'employee_id' => 'EMP001', 'department' => 'Science', 'email' => 'emily@school.com'],
+                (object)['id' => 2, 'name' => 'Mr. Frank Green', 'employee_id' => 'EMP002', 'department' => 'Mathematics', 'email' => 'frank@school.com'],
+            ]),
+            'staff' => collect([
+                (object)['id' => 1, 'name' => 'Grace Lee', 'employee_id' => 'STF001', 'department' => 'Administration', 'email' => 'grace@school.com'],
+            ]),
+        ]);
+    })->name('test.library.members.create');
+
+    Route::get('/issues', function () {
+        return view('admin.library.issues', [
+            'issues' => collect([
+                (object)[
+                    'id' => 1,
+                    'book_id' => 1,
+                    'book' => (object)['title' => 'To Kill a Mockingbird', 'isbn' => '978-0-06-112008-4', 'cover_image' => null],
+                    'member' => (object)['name' => 'John Doe', 'membership_number' => 'LIB001', 'member_type' => 'student'],
+                    'issue_date' => now()->subDays(10)->format('Y-m-d'),
+                    'due_date' => now()->addDays(4)->format('Y-m-d'),
+                    'return_date' => null,
+                    'is_overdue' => false,
+                    'days_overdue' => 0,
+                    'fine_amount' => 0,
+                    'fine_paid' => false,
+                ],
+                (object)[
+                    'id' => 2,
+                    'book_id' => 2,
+                    'book' => (object)['title' => 'A Brief History of Time', 'isbn' => '978-0-553-38016-3', 'cover_image' => null],
+                    'member' => (object)['name' => 'Jane Smith', 'membership_number' => 'LIB002', 'member_type' => 'teacher'],
+                    'issue_date' => now()->subDays(20)->format('Y-m-d'),
+                    'due_date' => now()->subDays(6)->format('Y-m-d'),
+                    'return_date' => null,
+                    'is_overdue' => true,
+                    'days_overdue' => 6,
+                    'fine_amount' => 6,
+                    'fine_paid' => false,
+                ],
+                (object)[
+                    'id' => 3,
+                    'book_id' => 3,
+                    'book' => (object)['title' => 'The Great Gatsby', 'isbn' => '978-0-7432-7356-5', 'cover_image' => null],
+                    'member' => (object)['name' => 'Bob Wilson', 'membership_number' => 'LIB003', 'member_type' => 'staff'],
+                    'issue_date' => now()->subMonths(1)->format('Y-m-d'),
+                    'due_date' => now()->subDays(16)->format('Y-m-d'),
+                    'return_date' => now()->subDays(14)->format('Y-m-d'),
+                    'is_overdue' => false,
+                    'days_overdue' => 0,
+                    'fine_amount' => 0,
+                    'fine_paid' => false,
+                ],
+            ]),
+        ]);
+    })->name('test.library.issues');
+
+    Route::get('/issues/create', function () {
+        return view('admin.library.issue-book', [
+            'recentIssues' => collect([
+                (object)[
+                    'id' => 1,
+                    'book' => (object)['title' => 'To Kill a Mockingbird'],
+                    'member' => (object)['name' => 'John Doe'],
+                    'issue_date' => now()->subDays(1)->format('Y-m-d'),
+                ],
+                (object)[
+                    'id' => 2,
+                    'book' => (object)['title' => 'A Brief History of Time'],
+                    'member' => (object)['name' => 'Jane Smith'],
+                    'issue_date' => now()->subDays(2)->format('Y-m-d'),
+                ],
+            ]),
+        ]);
+    })->name('test.library.issues.create');
+
+    Route::get('/returns/create', function () {
+        return view('admin.library.return-book', [
+            'overdueIssues' => collect([
+                (object)[
+                    'id' => 2,
+                    'book' => (object)['title' => 'A Brief History of Time'],
+                    'member' => (object)['name' => 'Jane Smith'],
+                    'days_overdue' => 6,
+                ],
+            ]),
+        ]);
+    })->name('test.library.returns.create');
+});
+
 require __DIR__.'/auth.php';
