@@ -47,6 +47,41 @@ return [
             'report' => false,
         ],
 
+        /*
+        |--------------------------------------------------------------------------
+        | Public Uploads Disk (Prompt 388)
+        |--------------------------------------------------------------------------
+        |
+        | Used for publicly accessible files like profile photos, book covers,
+        | and other assets that can be served directly via URL.
+        |
+        */
+        'public_uploads' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/uploads'),
+            'url' => env('APP_URL').'/storage/uploads',
+            'visibility' => 'public',
+            'throw' => false,
+            'report' => false,
+        ],
+
+        /*
+        |--------------------------------------------------------------------------
+        | Private Uploads Disk (Prompt 388)
+        |--------------------------------------------------------------------------
+        |
+        | Used for sensitive documents that require authorization checks before
+        | access. Files are served through secure download endpoints.
+        |
+        */
+        'private_uploads' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/uploads'),
+            'serve' => true,
+            'throw' => false,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
