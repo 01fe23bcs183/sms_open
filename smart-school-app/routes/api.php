@@ -137,7 +137,7 @@ Route::prefix('v1')
         
         /*
         |----------------------------------------------------------------------
-        | Dashboard Metrics API
+        | Dashboard Metrics API (Prompt 303)
         |----------------------------------------------------------------------
         */
         Route::prefix('dashboard')->name('dashboard.')->group(function () {
@@ -146,6 +146,7 @@ Route::prefix('v1')
             Route::get('/charts/fees', [\App\Http\Controllers\Api\DashboardController::class, 'feesChart'])->name('charts.fees');
             Route::get('/charts/students', [\App\Http\Controllers\Api\DashboardController::class, 'studentsChart'])->name('charts.students');
             Route::get('/recent-activities', [\App\Http\Controllers\Api\DashboardController::class, 'recentActivities'])->name('recent-activities');
+            Route::post('/clear-cache', [\App\Http\Controllers\Api\DashboardController::class, 'clearCache'])->name('clear-cache');
         });
         
         /*
@@ -187,7 +188,7 @@ Route::prefix('v1')
         
         /*
         |----------------------------------------------------------------------
-        | Reports API
+        | Reports API (Prompt 304)
         |----------------------------------------------------------------------
         */
         Route::prefix('reports')->name('reports.')->group(function () {
@@ -196,14 +197,20 @@ Route::prefix('v1')
             Route::get('/fees', [\App\Http\Controllers\Api\ReportController::class, 'fees'])->name('fees');
             Route::get('/exams', [\App\Http\Controllers\Api\ReportController::class, 'exams'])->name('exams');
             Route::post('/export', [\App\Http\Controllers\Api\ReportController::class, 'export'])->name('export');
+            Route::get('/options', [\App\Http\Controllers\Api\ReportController::class, 'options'])->name('options');
         });
         
         /*
         |----------------------------------------------------------------------
-        | Translations API
+        | Translations API (Prompt 305)
         |----------------------------------------------------------------------
         */
-        Route::get('/translations', [\App\Http\Controllers\Api\TranslationController::class, 'index'])->name('translations');
+        Route::prefix('translations')->name('translations.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Api\TranslationController::class, 'index'])->name('index');
+            Route::get('/groups', [\App\Http\Controllers\Api\TranslationController::class, 'groups'])->name('groups');
+            Route::get('/all', [\App\Http\Controllers\Api\TranslationController::class, 'all'])->name('all');
+            Route::post('/clear-cache', [\App\Http\Controllers\Api\TranslationController::class, 'clearCache'])->name('clear-cache');
+        });
         
         /*
         |----------------------------------------------------------------------

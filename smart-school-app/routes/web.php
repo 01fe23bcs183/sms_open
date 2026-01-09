@@ -53,6 +53,15 @@ Route::middleware('auth')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
+| Locale Routes (Prompt 305)
+|--------------------------------------------------------------------------
+*/
+Route::post('/locale', [\App\Http\Controllers\LocaleController::class, 'switch'])->name('locale.switch');
+Route::get('/locale', [\App\Http\Controllers\LocaleController::class, 'current'])->name('locale.current');
+Route::get('/locale/supported', [\App\Http\Controllers\LocaleController::class, 'supported'])->name('locale.supported');
+
+/*
+|--------------------------------------------------------------------------
 | Admin Routes
 |--------------------------------------------------------------------------
 */
