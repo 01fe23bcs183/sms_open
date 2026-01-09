@@ -129,15 +129,15 @@ class AssignmentSubmissionService
      * 
      * @param AssignmentSubmission $submission
      * @param float $marks
-     * @param string|null $feedback
      * @param int $gradedBy
+     * @param string|null $feedback
      * @return AssignmentSubmission
      */
     public function grade(
         AssignmentSubmission $submission,
         float $marks,
-        ?string $feedback = null,
-        int $gradedBy
+        int $gradedBy,
+        ?string $feedback = null
     ): AssignmentSubmission {
         $submission->update([
             'marks' => $marks,
