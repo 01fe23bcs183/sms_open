@@ -1601,7 +1601,63 @@ The Smart School Management System frontend is complete with all 291 prompts imp
 
 ---
 
+## Phase 24: Form Request Validation Implementation Part 2 (Prompts 353-367) - SESSION 34 COMPLETED
+
+| Prompt # | Description | Status |
+|----------|-------------|--------|
+| 353 | Create Message Store Form Request | COMPLETED |
+| 354 | Create Homework Store Form Request | COMPLETED |
+| 355 | Create Study Material Store Form Request | COMPLETED |
+| 356 | Create Income Store Form Request | COMPLETED |
+| 357 | Create Expense Store Form Request | COMPLETED |
+| 358 | Create Academic Session Store Form Request | COMPLETED |
+| 359 | Create Section Store Form Request | COMPLETED |
+| 360 | Create Subject Store Form Request | COMPLETED |
+| 361 | Create Exam Type Store Form Request | COMPLETED |
+| 362 | Create Exam Schedule Store Form Request | COMPLETED |
+| 363 | Create Fee Type Store Form Request | COMPLETED |
+| 364 | Create Fee Group Store Form Request | COMPLETED |
+| 365 | Create Fee Master Store Form Request | COMPLETED |
+| 366 | Create Fee Discount Store Form Request | COMPLETED |
+| 367 | Create Fee Allotment Store Form Request | COMPLETED |
+
+---
+
+### Session 34 Files Created:
+
+#### Form Request Classes (Prompts 353-367):
+| File | Description |
+|------|-------------|
+| `app/Http/Requests/MessageStoreRequest.php` | Message creation validation with recipient targeting and notification options |
+| `app/Http/Requests/HomeworkStoreRequest.php` | Homework creation validation with class, section, subject, and due date fields |
+| `app/Http/Requests/StudyMaterialStoreRequest.php` | Study material creation validation with material type and required attachment |
+| `app/Http/Requests/IncomeStoreRequest.php` | Income entry validation with income type, amount, and reference fields |
+| `app/Http/Requests/ExpenseStoreRequest.php` | Expense entry validation with expense type, amount, and reference fields |
+| `app/Http/Requests/AcademicSessionStoreRequest.php` | Academic session creation validation with date range and current session flag |
+| `app/Http/Requests/SectionStoreRequest.php` | Section creation validation with class, capacity, and class teacher fields |
+| `app/Http/Requests/SubjectStoreRequest.php` | Subject creation validation with code uniqueness, marks, and teacher assignment |
+| `app/Http/Requests/ExamTypeStoreRequest.php` | Exam type creation validation with code uniqueness and active status |
+| `app/Http/Requests/ExamScheduleStoreRequest.php` | Exam schedule creation validation with time slots and marks configuration |
+| `app/Http/Requests/FeeTypeStoreRequest.php` | Fee type creation validation with code uniqueness and active status |
+| `app/Http/Requests/FeeGroupStoreRequest.php` | Fee group creation validation with due date and fine rule assignment |
+| `app/Http/Requests/FeeMasterStoreRequest.php` | Fee master creation validation with fee group, type, and amount fields |
+| `app/Http/Requests/FeeDiscountStoreRequest.php` | Fee discount creation validation with percentage/fixed type and date range |
+| `app/Http/Requests/FeeAllotmentStoreRequest.php` | Fee allotment validation with student/class conditional requirement |
+
+### Session 34 Features:
+- All form requests extend BaseFormRequest for consistent validation error handling
+- Permission-based authorization using Spatie Permission (can() method)
+- Comprehensive validation rules for all fields (required, string, max, unique, exists, etc.)
+- Custom error messages for user-friendly validation feedback
+- Custom attribute names for cleaner error messages
+- Conditional validation (required_without for student_id/class_id in FeeAllotmentStoreRequest)
+- Date validation with after/after_or_equal rules for date ranges
+- Time validation with date_format:H:i for exam schedules
+- Numeric validation with min/lte rules for marks comparison
+
+---
+
 ## Last Updated
 Date: 2026-01-09
-Session: 33 - COMPLETED (Form Request Validation Implementation: 15 Form Request Classes)
-Status: BACKEND INTEGRATION PHASE IN PROGRESS (352/497 prompts - 70.8%)
+Session: 34 - COMPLETED (Form Request Validation Implementation Part 2: 15 Form Request Classes)
+Status: BACKEND INTEGRATION PHASE IN PROGRESS (367/497 prompts - 73.8%)
