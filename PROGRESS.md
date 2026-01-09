@@ -1482,7 +1482,69 @@ The Smart School Management System frontend is complete with all 291 prompts imp
 
 ---
 
+## Phase 22: Service Layer Implementation (Prompts 323-337) - SESSION 32 COMPLETED
+
+| Prompt # | Description | Status |
+|----------|-------------|--------|
+| 323 | Create Student Service | COMPLETED |
+| 324 | Create Teacher Service | COMPLETED |
+| 325 | Create Class and Section Service | COMPLETED |
+| 326 | Create Attendance Service | COMPLETED |
+| 327 | Create Exam Service | COMPLETED |
+| 328 | Create Result Service | COMPLETED |
+| 329 | Create Fees Service | COMPLETED |
+| 330 | Create Fee Payment Service | COMPLETED |
+| 331 | Create Library Service | COMPLETED |
+| 332 | Create Transport Service | COMPLETED |
+| 333 | Create Hostel Service | COMPLETED |
+| 334 | Create Communication Service | COMPLETED |
+| 335 | Create Report Service | COMPLETED (verified existing) |
+| 336 | Create Settings Service | COMPLETED |
+| 337 | Create Dashboard Service | COMPLETED (verified existing) |
+
+---
+
+### Session 32 Files Created/Modified:
+
+#### Domain Services (Prompts 323-334, 336):
+| File | Description |
+|------|-------------|
+| `app/Services/StudentService.php` | Student CRUD, promotion, archival, statistics |
+| `app/Services/TeacherService.php` | Teacher management with role assignment, class/subject mapping |
+| `app/Services/ClassService.php` | Class, section, subject management with capacity checking |
+| `app/Services/AttendanceService.php` | Attendance marking, summaries, statistics |
+| `app/Services/ExamService.php` | Exam CRUD, scheduling, conflict detection |
+| `app/Services/ResultService.php` | Marks entry, grade calculation, rankings |
+| `app/Services/FeesService.php` | Fee types, groups, discounts, fines, allotment |
+| `app/Services/FeePaymentService.php` | Payment recording, refunds, collection summaries |
+| `app/Services/LibraryService.php` | Book inventory, member management, issue/return |
+| `app/Services/TransportService.php` | Routes, stops, vehicles, student allocation |
+| `app/Services/HostelService.php` | Hostels, rooms, student assignment, transfers |
+| `app/Services/CommunicationService.php` | Notices, messaging, SMS/email with logging |
+| `app/Services/SettingsService.php` | System settings with caching |
+
+#### Existing Services Verified (Prompts 335, 337):
+| File | Description |
+|------|-------------|
+| `app/Services/ReportService.php` | Report data aggregation (from Session 30) |
+| `app/Services/DashboardService.php` | Dashboard metrics with caching (from Session 30) |
+
+### Session 32 Features:
+- Domain service classes for all major modules (Student, Teacher, Class, Attendance, Exam, Result, Fees, Library, Transport, Hostel, Communication, Settings)
+- Centralized business logic with DB::transaction() for data integrity
+- Comprehensive type hints and docblocks with Prompt references
+- Caching support in SettingsService and DashboardService
+- Fee calculation with discounts (percentage/fixed) and fines (daily/weekly/monthly/one-time)
+- Attendance summaries at student and class levels
+- Exam scheduling with conflict detection
+- Result calculation with automatic grade assignment and rankings
+- Library fine calculation based on overdue days
+- Transport and hostel capacity management
+- Communication service with SMS/email logging and audience targeting
+
+---
+
 ## Last Updated
-Date: 2026-01-08
-Session: 31 - COMPLETED (Middleware Implementation: Access Control, Security, and Request Handling)
-Status: BACKEND INTEGRATION PHASE IN PROGRESS (322/497 prompts - 64.8%)
+Date: 2026-01-09
+Session: 32 - COMPLETED (Service Layer Implementation: Domain Services for All Modules)
+Status: BACKEND INTEGRATION PHASE IN PROGRESS (337/497 prompts - 67.8%)
