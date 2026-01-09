@@ -1413,7 +1413,76 @@ The Smart School Management System frontend is complete with all 291 prompts imp
 
 ---
 
+## Phase 21: Middleware Implementation (Prompts 308-322) - SESSION 31 COMPLETED
+
+| Prompt # | Description | Status |
+|----------|-------------|--------|
+| 308 | Create Role Middleware | COMPLETED |
+| 309 | Create Permission Middleware | COMPLETED |
+| 310 | Create Module Access Middleware | COMPLETED |
+| 311 | Create Academic Session Middleware | COMPLETED |
+| 312 | Create School Context Middleware | COMPLETED |
+| 313 | Create Locale Middleware | COMPLETED |
+| 314 | Create Timezone Middleware | COMPLETED |
+| 315 | Create Force Password Change Middleware | COMPLETED |
+| 316 | Create Two-Factor Middleware | COMPLETED |
+| 317 | Create API Throttle Middleware | COMPLETED |
+| 318 | Create Audit Log Middleware | COMPLETED |
+| 319 | Create File Access Middleware | COMPLETED |
+| 320 | Create Parent-Child Access Middleware | COMPLETED |
+| 321 | Create Teacher-Class Access Middleware | COMPLETED |
+| 322 | Register Middleware and Route Groups | COMPLETED |
+
+---
+
+### Session 31 Files Created/Modified:
+
+#### Core Access Middleware (Prompts 308-314):
+| File | Description |
+|------|-------------|
+| `app/Http/Middleware/RoleMiddleware.php` | Role-based access control using Spatie Permission |
+| `app/Http/Middleware/PermissionMiddleware.php` | Permission-based access control |
+| `app/Http/Middleware/ModuleAccessMiddleware.php` | Module enable/disable control with 5-min caching |
+| `app/Http/Middleware/AcademicSessionMiddleware.php` | Academic session context with 10-min caching |
+| `app/Http/Middleware/SchoolContextMiddleware.php` | Multi-school context via subdomain/header |
+| `app/Http/Middleware/LocaleMiddleware.php` | Language selection with RTL support (10 languages) |
+| `app/Http/Middleware/TimezoneMiddleware.php` | Timezone configuration with common timezone list |
+
+#### Security Middleware (Prompts 315-321):
+| File | Description |
+|------|-------------|
+| `app/Http/Middleware/ForcePasswordChange.php` | Force password update for default/expired passwords |
+| `app/Http/Middleware/TwoFactorMiddleware.php` | 2FA verification with trusted device support |
+| `app/Http/Middleware/ApiThrottleMiddleware.php` | API rate limiting per user/IP |
+| `app/Http/Middleware/AuditLogMiddleware.php` | Request logging for compliance with sensitive field redaction |
+| `app/Http/Middleware/FileAccessMiddleware.php` | Private document access control |
+| `app/Http/Middleware/ParentChildAccessMiddleware.php` | Parent-child relationship enforcement |
+| `app/Http/Middleware/TeacherClassAccessMiddleware.php` | Teacher-class assignment validation |
+
+#### Configuration:
+| File | Description |
+|------|-------------|
+| `bootstrap/app.php` | Middleware registration with aliases and route groups |
+
+### Session 31 Features:
+- Role-based middleware using Spatie Permission (role:admin, role:teacher)
+- Permission-based middleware for fine-grained access (permission:manage-students)
+- Module access control with settings cache (module:attendance, module:fees)
+- Academic session context injection for all requests
+- Multi-school support via X-School-ID header or subdomain detection
+- Locale middleware with 10 languages and RTL detection
+- Timezone middleware with common timezone list
+- Force password change for security compliance
+- Two-factor authentication with trusted device cookies
+- API rate limiting (60 requests/minute default)
+- Audit logging with sensitive field redaction
+- File access control by document type
+- Parent-child access restriction
+- Teacher-class access validation
+
+---
+
 ## Last Updated
 Date: 2026-01-08
-Session: 30 - COMPLETED (Backend Integration Phase 2: Notifications, Dashboard, Reports, i18n, CSRF, Real-Time)
-Status: BACKEND INTEGRATION PHASE IN PROGRESS (307/497 prompts - 61.8%)
+Session: 31 - COMPLETED (Middleware Implementation: Access Control, Security, and Request Handling)
+Status: BACKEND INTEGRATION PHASE IN PROGRESS (322/497 prompts - 64.8%)
