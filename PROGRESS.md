@@ -1998,7 +1998,134 @@ The Smart School Management System frontend is complete with all 291 prompts imp
 
 ---
 
+## Session 40: Events and Listeners (Prompts 453-472) - COMPLETED
+
+| Prompt # | Description | Status |
+|----------|-------------|--------|
+| 453 | Register Event Service Provider | COMPLETED |
+| 454 | Create StudentCreated Event | COMPLETED |
+| 455 | Create StudentUpdated Event | COMPLETED |
+| 456 | Create TeacherAssigned Event | COMPLETED |
+| 457 | Create AttendanceMarked Event | COMPLETED |
+| 458 | Create ExamScheduled Event | COMPLETED |
+| 459 | Create ExamResultPublished Event | COMPLETED |
+| 460 | Create FeesInvoiceGenerated Event | COMPLETED |
+| 461 | Create FeesPaymentCompleted Event | COMPLETED |
+| 462 | Create LibraryBookIssued Event | COMPLETED |
+| 463 | Create LibraryBookReturned Event | COMPLETED |
+| 464 | Create TransportAssigned Event | COMPLETED |
+| 465 | Create HostelAssigned Event | COMPLETED |
+| 466 | Create NoticePublished Event | COMPLETED |
+| 467 | Create MessageSent Event | COMPLETED |
+| 468 | Create Student Event Listeners | COMPLETED |
+| 469 | Create Attendance Event Listeners | COMPLETED |
+| 470 | Create Exam Event Listeners | COMPLETED |
+| 471 | Create Fees Event Listeners | COMPLETED |
+| 472 | Create Library Event Listeners | COMPLETED |
+
+---
+
+### Session 40 Files Created:
+
+#### Part 1: Core Events (Prompts 453-467):
+| File | Description |
+|------|-------------|
+| `app/Providers/EventServiceProvider.php` | Centralized event-to-listener mapping for all 15 events |
+| `app/Events/StudentCreated.php` | Event triggered when a new student is admitted |
+| `app/Events/StudentUpdated.php` | Event triggered when student profile is updated |
+| `app/Events/TeacherAssigned.php` | Event triggered when teacher is assigned to class/section/subject |
+| `app/Events/AttendanceMarked.php` | Event triggered when attendance is marked for a class/section |
+| `app/Events/ExamScheduled.php` | Event triggered when exam schedule is published |
+| `app/Events/ExamResultPublished.php` | Event triggered when exam results are published |
+| `app/Events/FeesInvoiceGenerated.php` | Event triggered when fee invoice is generated |
+| `app/Events/FeesPaymentCompleted.php` | Event triggered after successful fee payment |
+| `app/Events/LibraryBookIssued.php` | Event triggered when book is issued to library member |
+| `app/Events/LibraryBookReturned.php` | Event triggered when book is returned to library |
+| `app/Events/TransportAssigned.php` | Event triggered when student is assigned to transport route |
+| `app/Events/HostelAssigned.php` | Event triggered when student is assigned to hostel room |
+| `app/Events/NoticePublished.php` | Event triggered when notice is published |
+| `app/Events/MessageSent.php` | Event triggered when message is sent |
+
+#### Part 2: Event Listeners (Prompts 468-472):
+
+##### Student Listeners:
+| File | Description |
+|------|-------------|
+| `app/Listeners/Student/SendStudentWelcomeNotification.php` | Sends welcome notification to newly admitted students and parents |
+| `app/Listeners/Student/LogStudentAdmission.php` | Creates audit log entry for student admissions |
+| `app/Listeners/Student/LogStudentProfileChange.php` | Creates audit log entry for student profile changes |
+| `app/Listeners/Student/RefreshStudentCache.php` | Invalidates and refreshes student-related caches |
+
+##### Attendance Listeners:
+| File | Description |
+|------|-------------|
+| `app/Listeners/Attendance/SendAttendanceNotification.php` | Sends attendance notifications to parents for absent/late students |
+| `app/Listeners/Attendance/UpdateAttendanceSummary.php` | Updates attendance summary caches |
+| `app/Listeners/Attendance/LogAttendanceMarked.php` | Creates audit log entry for attendance marking |
+
+##### Exam Listeners:
+| File | Description |
+|------|-------------|
+| `app/Listeners/Exam/SendExamScheduleNotification.php` | Sends notifications when exam is scheduled |
+| `app/Listeners/Exam/LogExamScheduled.php` | Creates audit log entry for exam scheduling |
+| `app/Listeners/Exam/SendExamResultNotification.php` | Sends notifications when exam results are published |
+| `app/Listeners/Exam/UpdateReportCardAvailability.php` | Updates report card availability status |
+| `app/Listeners/Exam/LogExamResultPublished.php` | Creates audit log entry for exam result publishing |
+
+##### Fees Listeners:
+| File | Description |
+|------|-------------|
+| `app/Listeners/Fees/SendFeeInvoiceNotification.php` | Sends notification when fee invoice is generated |
+| `app/Listeners/Fees/ScheduleFeeReminder.php` | Schedules reminder jobs before fee due date |
+| `app/Listeners/Fees/SendPaymentConfirmation.php` | Sends payment confirmation notification |
+| `app/Listeners/Fees/GenerateFeeReceipt.php` | Dispatches job to generate PDF receipt |
+| `app/Listeners/Fees/UpdateLedgerEntry.php` | Posts ledger entry for fee payment |
+| `app/Listeners/Fees/LogFeesPayment.php` | Creates audit log entry for fee payments |
+
+##### Library Listeners:
+| File | Description |
+|------|-------------|
+| `app/Listeners/Library/SendBookIssuedNotification.php` | Sends notification when book is issued |
+| `app/Listeners/Library/UpdateBookStock.php` | Updates available stock count for books |
+| `app/Listeners/Library/LogBookIssued.php` | Creates audit log entry for book issues |
+| `app/Listeners/Library/SendBookReturnedNotification.php` | Sends notification when book is returned |
+| `app/Listeners/Library/CalculateLibraryFine.php` | Calculates and records fine for late returns |
+| `app/Listeners/Library/LogBookReturned.php` | Creates audit log entry for book returns |
+
+##### Additional Listeners (Teacher, Transport, Hostel, Notice, Message):
+| File | Description |
+|------|-------------|
+| `app/Listeners/Teacher/SendTeacherAssignmentNotification.php` | Sends notification for teacher assignments |
+| `app/Listeners/Teacher/UpdateTimetableCache.php` | Refreshes timetable cache on assignment changes |
+| `app/Listeners/Teacher/LogTeacherAssignment.php` | Creates audit log entry for teacher assignments |
+| `app/Listeners/Transport/SendTransportAssignmentNotification.php` | Sends notification for transport assignments |
+| `app/Listeners/Transport/UpdateVehicleOccupancy.php` | Updates vehicle occupancy counts |
+| `app/Listeners/Transport/LogTransportAssignment.php` | Creates audit log entry for transport assignments |
+| `app/Listeners/Hostel/SendHostelAssignmentNotification.php` | Sends notification for hostel assignments |
+| `app/Listeners/Hostel/UpdateRoomOccupancy.php` | Updates hostel room occupancy status |
+| `app/Listeners/Hostel/LogHostelAssignment.php` | Creates audit log entry for hostel assignments |
+| `app/Listeners/Notice/SendNoticeNotification.php` | Sends real-time notifications for notices |
+| `app/Listeners/Notice/StoreNoticeNotification.php` | Stores notification and updates cache |
+| `app/Listeners/Notice/LogNoticePublished.php` | Creates audit log entry for notice publishing |
+| `app/Listeners/Message/SendMessageNotification.php` | Sends notification to message recipients |
+| `app/Listeners/Message/UpdateUnreadCount.php` | Updates unread message count cache |
+| `app/Listeners/Message/LogMessageSent.php` | Creates audit log entry for messages |
+
+### Session 40 Features:
+- Event-driven architecture with 15 core events for all major modules
+- 39 event listeners organized by module (Student, Attendance, Exam, Fees, Library, Teacher, Transport, Hostel, Notice, Message)
+- All events implement ShouldBroadcast for real-time updates via WebSockets
+- All listeners implement ShouldQueue for asynchronous processing
+- Comprehensive helper methods on events for easy data access
+- Multi-channel notification delivery (Email, SMS, Database, Push)
+- Audit logging for compliance and tracking
+- Cache invalidation and refresh patterns
+- Integration with NotificationService and AuditLogService from Session 39
+- Centralized event-to-listener mapping in EventServiceProvider
+
+---
+
 ## Last Updated
 Date: 2026-01-09
-Session: 39 - COMPLETED (Real-time Notifications & Queue Jobs: 20 Prompts)
-Status: BACKEND INTEGRATION PHASE IN PROGRESS (452/497 prompts - 90.9%)
+Session: 40 - COMPLETED (Events and Listeners: 20 Prompts)
+Status: BACKEND INTEGRATION PHASE IN PROGRESS (472/497 prompts - 95.0%)
