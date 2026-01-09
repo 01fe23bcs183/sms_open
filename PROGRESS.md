@@ -1836,7 +1836,88 @@ The Smart School Management System frontend is complete with all 291 prompts imp
 
 ---
 
+## Session 38: File Cleanup & Export Functionality (Prompts 413-432) - COMPLETED
+
+| Prompt # | Description | Status |
+|----------|-------------|--------|
+| 413 | Create Temporary File Cleanup Job | COMPLETED |
+| 414 | Create Orphaned File Cleanup Job | COMPLETED |
+| 415 | Create Storage Statistics Service | COMPLETED |
+| 416 | Create File Cleanup Command | COMPLETED |
+| 417 | Schedule Cleanup Jobs in Kernel.php | COMPLETED |
+| 418 | Create Cleanup Configuration | COMPLETED |
+| 419 | Create Export Service Base (existing - skipped) | COMPLETED |
+| 420 | Create Student Export Service | COMPLETED |
+| 421 | Create Attendance Export Service | COMPLETED |
+| 422 | Create Exam Export Service | COMPLETED |
+| 423 | Create Fee Export Service | COMPLETED |
+| 424 | Create Library Export Service | COMPLETED |
+| 425 | Create PDF Report Service | COMPLETED |
+| 426 | Create Student Report Card Service | COMPLETED |
+| 427 | Create Fee Receipt Service | COMPLETED |
+| 428 | Create Attendance Report Service | COMPLETED |
+| 429 | Create Library Report Service | COMPLETED |
+| 430 | Create Transport Report Service | COMPLETED |
+| 431 | Create Hostel Report Service | COMPLETED |
+| 432 | Create Dashboard Statistics Service | COMPLETED |
+
+---
+
+### Session 38 Files Created:
+
+#### Part 1: File Cleanup & Maintenance (Prompts 413-418):
+| File | Description |
+|------|-------------|
+| `app/Jobs/CleanupTemporaryFiles.php` | Job for cleaning up temporary files older than configured retention period |
+| `app/Jobs/CleanupOrphanedFiles.php` | Job for cleaning up orphaned files not referenced in database |
+| `app/Services/StorageStatisticsService.php` | Service for gathering storage statistics and health checks |
+| `app/Console/Commands/CleanupFiles.php` | Artisan command for manual file cleanup with dry-run and stats options |
+| `app/Console/Kernel.php` | Console kernel with scheduled cleanup jobs (daily at 02:00, weekly Sundays at 03:00) |
+| `config/cleanup.php` | Configuration file for cleanup settings (retention periods, directories, etc.) |
+
+#### Part 2: Export Services (Prompts 419-424):
+| File | Description |
+|------|-------------|
+| `app/Services/StudentExportService.php` | Service for exporting student data with filtering and statistics |
+| `app/Services/AttendanceExportService.php` | Service for exporting attendance records with date range filtering |
+| `app/Services/ExamExportService.php` | Service for exporting exam data and results |
+| `app/Services/FeeExportService.php` | Service for exporting fee transactions and payment records |
+| `app/Services/LibraryExportService.php` | Service for exporting library inventory and issue records |
+
+#### Part 3: Report Generation (Prompts 425-430):
+| File | Description |
+|------|-------------|
+| `app/Services/PdfReportService.php` | Base service for PDF generation using DomPDF with school branding |
+| `app/Services/ReportCardService.php` | Service for generating student report cards with grades and rankings |
+| `app/Services/FeeReceiptService.php` | Service for generating fee payment receipts |
+| `app/Services/AttendanceReportService.php` | Service for generating attendance reports (daily, monthly, summary) |
+| `app/Services/LibraryReportService.php` | Service for generating library reports (inventory, overdue, activity) |
+| `app/Services/TransportReportService.php` | Service for generating transport reports (routes, vehicles, assignments) |
+
+#### Part 4: Additional Services (Prompts 431-432):
+| File | Description |
+|------|-------------|
+| `app/Services/HostelReportService.php` | Service for generating hostel reports (allocation, occupancy, summary) |
+| `app/Services/DashboardStatisticsService.php` | Service for aggregating dashboard statistics from all modules |
+
+### Session 38 Features:
+- File cleanup jobs with configurable retention periods (7 days default)
+- Scheduled cleanup: daily temp files at 02:00, weekly orphaned files on Sundays at 03:00
+- Storage statistics service with module-wise breakdown
+- Artisan command with dry-run mode for safe testing
+- Export services for 5 modules (Students, Attendance, Exams, Fees, Library)
+- PDF report generation using DomPDF with school branding
+- Report card generation with grade calculation and ranking
+- Fee receipt generation with payment details
+- Attendance reports (daily, monthly, summary views)
+- Library reports (inventory, overdue, issue/return, member activity)
+- Transport reports (route-wise students, vehicles, assignments)
+- Hostel reports (room allocation, occupancy, student hostel)
+- Dashboard statistics aggregating data from all modules with role-based views
+
+---
+
 ## Last Updated
 Date: 2026-01-09
-Session: 37 - COMPLETED (Module-Specific File Uploads: 20 Prompts)
-Status: BACKEND INTEGRATION PHASE IN PROGRESS (412/497 prompts - 82.9%)
+Session: 38 - COMPLETED (File Cleanup & Export Functionality: 20 Prompts)
+Status: BACKEND INTEGRATION PHASE IN PROGRESS (432/497 prompts - 86.9%)
