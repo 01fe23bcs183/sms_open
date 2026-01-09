@@ -6,19 +6,30 @@ use App\Models\LibraryBook;
 use App\Models\LibraryCategory;
 use App\Models\LibraryMember;
 use App\Models\LibraryIssue;
+use App\Services\FileUploadService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\UploadedFile;
 use Carbon\Carbon;
 
 /**
  * Library Service
  * 
  * Prompt 331: Create Library Service
+ * Prompt 411: Implement Library Book Cover Upload
  * 
  * Manages library inventory and issue rules. Handles book stock,
- * issue, and return flows. Validates issue limits and calculates fines.
+ * issue, and return flows. Validates issue limits, calculates fines,
+ * and handles book cover image uploads.
  */
 class LibraryService
 {
+    protected FileUploadService $fileUploadService;
+
+    public function __construct(FileUploadService $fileUploadService)
+    {
+        $this->fileUploadService = $fileUploadService;
+    }
+
     /**
      * Default fine per day for late returns.
      */
@@ -406,5 +417,97 @@ class LibraryService
         $sequence = $lastMember ? ((int) substr($lastMember->membership_number, -4)) + 1 : 1;
         
         return 'LIB' . $year . str_pad($sequence, 4, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Upload book cover image.
+     * 
+     * Prompt 411: Implement Library Book Cover Upload
+     * 
+     * @param LibraryBook $book
+     * @param UploadedFile $file
+     * @return array Upload result with path and URL
+     */
+    public function uploadBookCover(LibraryBook $book, UploadedFile $file): array
+    {
+        // Validate the file
+        $validation = $this->fileUploadService->validate($file, 'book_cover');
+        if (!$validation['valid']) {
+            throw new \Exception(implode(', ', $validation['errors']));
+        }
+
+        // Delete old cover if exists
+        if ($book->cover_image) {
+            $this->fileUploadService->delete($book->cover_image, 'public_uploads');
+        }
+
+        // Upload new cover
+        $result = $this->fileUploadService->uploadBookCover($file, $book->id);
+
+        // Update book record
+        $book->update(['cover_image' => $result['path']]);
+
+        return $result;
+    }
+
+    /**
+     * Add book with cover image.
+     * 
+     * Prompt 411: Implement Library Book Cover Upload
+     * 
+     * @param array $data
+     * @param UploadedFile|null $coverImage
+     * @return LibraryBook
+     */
+    public function addBookWithCover(array $data, ?UploadedFile $coverImage = null): LibraryBook
+    {
+        return DB::transaction(function () use ($data, $coverImage) {
+            // Create book first
+            $book = $this->addBook($data);
+
+            // Upload cover if provided
+            if ($coverImage instanceof UploadedFile) {
+                $this->uploadBookCover($book, $coverImage);
+            }
+
+            return $book->fresh();
+        });
+    }
+
+    /**
+     * Delete book cover image.
+     * 
+     * Prompt 411: Implement Library Book Cover Upload
+     * 
+     * @param LibraryBook $book
+     * @return bool
+     */
+    public function deleteBookCover(LibraryBook $book): bool
+    {
+        if (!$book->cover_image) {
+            return false;
+        }
+
+        // Delete file from storage
+        $this->fileUploadService->delete($book->cover_image, 'public_uploads');
+
+        // Update book record
+        $book->update(['cover_image' => null]);
+
+        return true;
+    }
+
+    /**
+     * Replace book cover image.
+     * 
+     * Prompt 411: Implement Library Book Cover Upload
+     * 
+     * @param LibraryBook $book
+     * @param UploadedFile $file
+     * @return array Upload result with path and URL
+     */
+    public function replaceBookCover(LibraryBook $book, UploadedFile $file): array
+    {
+        return $this->uploadBookCover($book, $file);
     }
 }

@@ -3,26 +3,40 @@
 namespace App\Services;
 
 use App\Models\Notice;
+use App\Models\NoticeAttachment;
 use App\Models\Message;
+use App\Models\MessageAttachment;
 use App\Models\MessageRecipient;
 use App\Models\SmsLog;
 use App\Models\EmailLog;
 use App\Models\User;
 use App\Models\Student;
+use App\Services\FileUploadService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Http\UploadedFile;
 use Carbon\Carbon;
 
 /**
  * Communication Service
  * 
  * Prompt 334: Create Communication Service
+ * Prompt 405: Implement Notice Attachment Uploads
+ * Prompt 406: Implement Message Attachment Uploads
  * 
  * Centralizes notices and messaging logic. Sends notices, messages,
- * SMS, and email. Supports audience targeting and logs delivery status.
+ * SMS, and email. Supports audience targeting, file attachments,
+ * and logs delivery status.
  */
 class CommunicationService
 {
+    protected FileUploadService $fileUploadService;
+
+    public function __construct(FileUploadService $fileUploadService)
+    {
+        $this->fileUploadService = $fileUploadService;
+    }
+
     /**
      * Create a notice.
      * 
@@ -475,5 +489,311 @@ class CommunicationService
             'total_emails' => $totalEmails,
             'emails_sent' => $emailsSent,
         ];
+    }
+
+    /**
+     * Upload a notice attachment.
+     * 
+     * Prompt 405: Implement Notice Attachment Uploads
+     * 
+     * @param Notice $notice
+     * @param UploadedFile $file
+     * @param string|null $description
+     * @return NoticeAttachment
+     */
+    public function uploadNoticeAttachment(
+        Notice $notice,
+        UploadedFile $file,
+        ?string $description = null
+    ): NoticeAttachment {
+        // Validate the file
+        $validation = $this->fileUploadService->validate($file, 'communication_attachment');
+        if (!$validation['valid']) {
+            throw new \Exception(implode(', ', $validation['errors']));
+        }
+
+        // Upload file using FileUploadService
+        $result = $this->fileUploadService->uploadCommunicationAttachment($file, $notice->id);
+
+        // Create attachment record
+        return NoticeAttachment::create([
+            'notice_id' => $notice->id,
+            'file_path' => $result['path'],
+            'original_name' => $result['original_name'],
+            'mime_type' => $result['mime_type'],
+            'size' => $result['size'],
+            'disk' => $result['disk'],
+            'description' => $description,
+        ]);
+    }
+
+    /**
+     * Upload multiple notice attachments.
+     * 
+     * Prompt 405: Implement Notice Attachment Uploads
+     * 
+     * @param Notice $notice
+     * @param array $files Array of UploadedFile objects
+     * @return array Array of NoticeAttachment objects
+     */
+    public function uploadNoticeAttachments(Notice $notice, array $files): array
+    {
+        $attachments = [];
+        foreach ($files as $file) {
+            if ($file instanceof UploadedFile) {
+                $attachments[] = $this->uploadNoticeAttachment($notice, $file);
+            }
+        }
+        return $attachments;
+    }
+
+    /**
+     * Delete a notice attachment.
+     * 
+     * Prompt 405: Implement Notice Attachment Uploads
+     * 
+     * @param NoticeAttachment $attachment
+     * @return bool
+     */
+    public function deleteNoticeAttachment(NoticeAttachment $attachment): bool
+    {
+        // Delete file from storage
+        $this->fileUploadService->delete($attachment->file_path, $attachment->disk ?? 'private_uploads');
+
+        // Delete record
+        return $attachment->delete();
+    }
+
+    /**
+     * Replace a notice attachment.
+     * 
+     * Prompt 405: Implement Notice Attachment Uploads
+     * 
+     * @param NoticeAttachment $attachment
+     * @param UploadedFile $file
+     * @return NoticeAttachment
+     */
+    public function replaceNoticeAttachment(NoticeAttachment $attachment, UploadedFile $file): NoticeAttachment
+    {
+        // Validate the file
+        $validation = $this->fileUploadService->validate($file, 'communication_attachment');
+        if (!$validation['valid']) {
+            throw new \Exception(implode(', ', $validation['errors']));
+        }
+
+        // Replace file using FileUploadService
+        $result = $this->fileUploadService->replace(
+            $file,
+            $attachment->file_path,
+            'communication/notices',
+            'private_uploads'
+        );
+
+        // Update attachment record
+        $attachment->update([
+            'file_path' => $result['path'],
+            'original_name' => $result['original_name'],
+            'mime_type' => $result['mime_type'],
+            'size' => $result['size'],
+        ]);
+
+        return $attachment->fresh();
+    }
+
+    /**
+     * Create notice with attachments.
+     * 
+     * Prompt 405: Implement Notice Attachment Uploads
+     * 
+     * @param array $data
+     * @param array $attachments Array of UploadedFile objects
+     * @return Notice
+     */
+    public function createNoticeWithAttachments(array $data, array $attachments = []): Notice
+    {
+        return DB::transaction(function () use ($data, $attachments) {
+            $notice = $this->createNotice($data);
+
+            // Upload attachments
+            foreach ($attachments as $file) {
+                if ($file instanceof UploadedFile) {
+                    $this->uploadNoticeAttachment($notice, $file);
+                }
+            }
+
+            return $notice->load('attachments');
+        });
+    }
+
+    /**
+     * Upload a message attachment.
+     * 
+     * Prompt 406: Implement Message Attachment Uploads
+     * 
+     * @param Message $message
+     * @param UploadedFile $file
+     * @param string|null $description
+     * @return MessageAttachment
+     */
+    public function uploadMessageAttachment(
+        Message $message,
+        UploadedFile $file,
+        ?string $description = null
+    ): MessageAttachment {
+        // Validate the file
+        $validation = $this->fileUploadService->validate($file, 'communication_attachment');
+        if (!$validation['valid']) {
+            throw new \Exception(implode(', ', $validation['errors']));
+        }
+
+        // Upload file using FileUploadService
+        $result = $this->fileUploadService->uploadCommunicationAttachment($file, $message->id);
+
+        // Create attachment record
+        return MessageAttachment::create([
+            'message_id' => $message->id,
+            'file_path' => $result['path'],
+            'original_name' => $result['original_name'],
+            'mime_type' => $result['mime_type'],
+            'size' => $result['size'],
+            'disk' => $result['disk'],
+            'description' => $description,
+        ]);
+    }
+
+    /**
+     * Upload multiple message attachments.
+     * 
+     * Prompt 406: Implement Message Attachment Uploads
+     * 
+     * @param Message $message
+     * @param array $files Array of UploadedFile objects
+     * @return array Array of MessageAttachment objects
+     */
+    public function uploadMessageAttachments(Message $message, array $files): array
+    {
+        $attachments = [];
+        foreach ($files as $file) {
+            if ($file instanceof UploadedFile) {
+                $attachments[] = $this->uploadMessageAttachment($message, $file);
+            }
+        }
+        return $attachments;
+    }
+
+    /**
+     * Delete a message attachment.
+     * 
+     * Prompt 406: Implement Message Attachment Uploads
+     * 
+     * @param MessageAttachment $attachment
+     * @return bool
+     */
+    public function deleteMessageAttachment(MessageAttachment $attachment): bool
+    {
+        // Delete file from storage
+        $this->fileUploadService->delete($attachment->file_path, $attachment->disk ?? 'private_uploads');
+
+        // Delete record
+        return $attachment->delete();
+    }
+
+    /**
+     * Replace a message attachment.
+     * 
+     * Prompt 406: Implement Message Attachment Uploads
+     * 
+     * @param MessageAttachment $attachment
+     * @param UploadedFile $file
+     * @return MessageAttachment
+     */
+    public function replaceMessageAttachment(MessageAttachment $attachment, UploadedFile $file): MessageAttachment
+    {
+        // Validate the file
+        $validation = $this->fileUploadService->validate($file, 'communication_attachment');
+        if (!$validation['valid']) {
+            throw new \Exception(implode(', ', $validation['errors']));
+        }
+
+        // Replace file using FileUploadService
+        $result = $this->fileUploadService->replace(
+            $file,
+            $attachment->file_path,
+            'communication/messages',
+            'private_uploads'
+        );
+
+        // Update attachment record
+        $attachment->update([
+            'file_path' => $result['path'],
+            'original_name' => $result['original_name'],
+            'mime_type' => $result['mime_type'],
+            'size' => $result['size'],
+        ]);
+
+        return $attachment->fresh();
+    }
+
+    /**
+     * Send message with attachments.
+     * 
+     * Prompt 406: Implement Message Attachment Uploads
+     * 
+     * @param int $senderId
+     * @param array $recipientIds
+     * @param string $subject
+     * @param string $body
+     * @param array $attachments Array of UploadedFile objects
+     * @return Message
+     */
+    public function sendMessageWithAttachments(
+        int $senderId,
+        array $recipientIds,
+        string $subject,
+        string $body,
+        array $attachments = []
+    ): Message {
+        return DB::transaction(function () use ($senderId, $recipientIds, $subject, $body, $attachments) {
+            $message = $this->sendMessage($senderId, $recipientIds, $subject, $body);
+
+            // Upload attachments
+            foreach ($attachments as $file) {
+                if ($file instanceof UploadedFile) {
+                    $this->uploadMessageAttachment($message, $file);
+                }
+            }
+
+            return $message->load('attachments');
+        });
+    }
+
+    /**
+     * Get notice attachments.
+     * 
+     * Prompt 405: Implement Notice Attachment Uploads
+     * 
+     * @param Notice $notice
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getNoticeAttachments(Notice $notice)
+    {
+        return NoticeAttachment::where('notice_id', $notice->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
+    /**
+     * Get message attachments.
+     * 
+     * Prompt 406: Implement Message Attachment Uploads
+     * 
+     * @param Message $message
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getMessageAttachments(Message $message)
+    {
+        return MessageAttachment::where('message_id', $message->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
     }
 }

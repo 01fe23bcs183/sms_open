@@ -1758,7 +1758,85 @@ The Smart School Management System frontend is complete with all 291 prompts imp
 
 ---
 
+## Session 37: Module-Specific File Uploads (Prompts 393-412) - COMPLETED
+
+| Prompt # | Description | Status |
+|----------|-------------|--------|
+| 393 | Implement Student Photo Upload (Update StudentService) | COMPLETED |
+| 394 | Implement Student Document Uploads (Update StudentService) | COMPLETED |
+| 395 | Implement Teacher Photo Upload (Update TeacherService) | COMPLETED |
+| 396 | Implement Teacher Document Uploads (Update TeacherService) | COMPLETED |
+| 397 | Create Student Document Model | COMPLETED |
+| 398 | Create Teacher Document Model | COMPLETED |
+| 399 | Implement Homework Attachment Uploads (Create HomeworkService) | COMPLETED |
+| 400 | Implement Study Material Uploads (Create StudyMaterialService) | COMPLETED |
+| 401 | Implement Assignment Submission Uploads (Create AssignmentSubmissionService) | COMPLETED |
+| 402 | Create Homework Attachment Model | COMPLETED |
+| 403 | Create Study Material Attachment Model | COMPLETED |
+| 404 | Create Assignment Submission Model | COMPLETED |
+| 405 | Implement Notice Attachment Uploads (Update CommunicationService) | COMPLETED |
+| 406 | Implement Message Attachment Uploads (Update CommunicationService) | COMPLETED |
+| 407 | Implement Fee Payment Proof Upload (Update FeePaymentService) | COMPLETED |
+| 408 | Create Notice Attachment Model | COMPLETED |
+| 409 | Create Message Attachment Model | COMPLETED |
+| 410 | Create Payment Proof Model | COMPLETED |
+| 411 | Implement Library Book Cover Upload (Update LibraryService) | COMPLETED |
+| 412 | Implement Transport & Hostel Media Uploads (Update TransportService and HostelService) | COMPLETED |
+
+---
+
+### Session 37 Files Created/Modified:
+
+#### Part 1: Student & Teacher Uploads (Prompts 393-398):
+| File | Description |
+|------|-------------|
+| `app/Services/StudentService.php` | Updated with photo and document upload methods using FileUploadService |
+| `app/Services/TeacherService.php` | Updated with photo and document upload methods using FileUploadService |
+| `app/Models/StudentDocument.php` | New model for student document metadata with soft deletes and verification |
+| `app/Models/TeacherDocument.php` | New model for teacher document metadata with expiry tracking |
+
+#### Part 2: Academic Module Uploads (Prompts 399-404):
+| File | Description |
+|------|-------------|
+| `app/Services/HomeworkService.php` | New service for homework management with attachment uploads |
+| `app/Services/StudyMaterialService.php` | New service for study material management with attachment uploads |
+| `app/Services/AssignmentSubmissionService.php` | New service for assignment submission management with file uploads |
+| `app/Models/HomeworkAttachment.php` | New model for homework attachment metadata |
+| `app/Models/StudyMaterialAttachment.php` | New model for study material attachment metadata with download tracking |
+| `app/Models/AssignmentSubmission.php` | New model for assignment submissions with grading support |
+
+#### Part 3: Communication & Finance Uploads (Prompts 405-410):
+| File | Description |
+|------|-------------|
+| `app/Services/CommunicationService.php` | Updated with notice and message attachment upload methods |
+| `app/Services/FeePaymentService.php` | Updated with payment proof upload and verification methods |
+| `app/Models/NoticeAttachment.php` | New model for notice attachment metadata |
+| `app/Models/MessageAttachment.php` | New model for message attachment metadata |
+| `app/Models/PaymentProof.php` | New model for payment proof metadata with verification tracking |
+
+#### Part 4: Library, Transport & Hostel Uploads (Prompts 411-412):
+| File | Description |
+|------|-------------|
+| `app/Services/LibraryService.php` | Updated with book cover upload methods |
+| `app/Services/TransportService.php` | Updated with vehicle document and image upload methods |
+| `app/Services/HostelService.php` | Updated with hostel and room image upload methods, gallery support |
+
+### Session 37 Features:
+- Module-specific file upload integration across 8 modules
+- 8 new models for attachment/document metadata storage
+- 3 new services for academic module management (Homework, StudyMaterial, AssignmentSubmission)
+- 7 existing services updated with file upload capabilities
+- All services use FileUploadService for centralized file handling
+- Soft deletes for data preservation across all new models
+- Verification tracking for documents and payment proofs
+- Expiry date tracking for teacher documents
+- Download count tracking for study materials
+- Gallery support for hostel images
+- JSON field storage for vehicle documents
+
+---
+
 ## Last Updated
 Date: 2026-01-09
-Session: 36 - COMPLETED (Middleware & File Upload Implementation: 20 Prompts)
-Status: BACKEND INTEGRATION PHASE IN PROGRESS (392/497 prompts - 78.9%)
+Session: 37 - COMPLETED (Module-Specific File Uploads: 20 Prompts)
+Status: BACKEND INTEGRATION PHASE IN PROGRESS (412/497 prompts - 82.9%)

@@ -7,18 +7,29 @@ use App\Models\HostelRoomType;
 use App\Models\HostelRoom;
 use App\Models\HostelAssignment;
 use App\Models\Student;
+use App\Services\FileUploadService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\UploadedFile;
 
 /**
  * Hostel Service
  * 
  * Prompt 333: Create Hostel Service
+ * Prompt 412: Implement Hostel Media Uploads
  * 
  * Manages hostel rooms and allocations. Assigns rooms and tracks occupancy.
- * Handles hostel fees and maintains occupancy counts.
+ * Handles hostel fees, maintains occupancy counts, and manages hostel
+ * and room image uploads.
  */
 class HostelService
 {
+    protected FileUploadService $fileUploadService;
+
+    public function __construct(FileUploadService $fileUploadService)
+    {
+        $this->fileUploadService = $fileUploadService;
+    }
+
     /**
      * Create a hostel.
      * 
@@ -420,5 +431,239 @@ class HostelService
                 'monthly_fee' => $assignment->monthly_fee,
             ];
         })->toArray();
+    }
+
+    /**
+     * Upload hostel image.
+     * 
+     * Prompt 412: Implement Hostel Media Uploads
+     * 
+     * @param Hostel $hostel
+     * @param UploadedFile $file
+     * @return array Upload result with path and URL
+     */
+    public function uploadHostelImage(Hostel $hostel, UploadedFile $file): array
+    {
+        // Validate the file
+        $validation = $this->fileUploadService->validate($file, 'hostel_image');
+        if (!$validation['valid']) {
+            throw new \Exception(implode(', ', $validation['errors']));
+        }
+
+        // Delete old image if exists
+        if ($hostel->image) {
+            $this->fileUploadService->delete($hostel->image, 'public_uploads');
+        }
+
+        // Upload new image
+        $result = $this->fileUploadService->uploadPublic(
+            $file,
+            'hostel/buildings',
+            ['prefix' => "hostel_{$hostel->id}"]
+        );
+
+        // Update hostel record
+        $hostel->update(['image' => $result['path']]);
+
+        return $result;
+    }
+
+    /**
+     * Upload room image.
+     * 
+     * Prompt 412: Implement Hostel Media Uploads
+     * 
+     * @param HostelRoom $room
+     * @param UploadedFile $file
+     * @return array Upload result with path and URL
+     */
+    public function uploadRoomImage(HostelRoom $room, UploadedFile $file): array
+    {
+        // Validate the file
+        $validation = $this->fileUploadService->validate($file, 'room_image');
+        if (!$validation['valid']) {
+            throw new \Exception(implode(', ', $validation['errors']));
+        }
+
+        // Delete old image if exists
+        if ($room->image) {
+            $this->fileUploadService->delete($room->image, 'public_uploads');
+        }
+
+        // Upload new image
+        $result = $this->fileUploadService->uploadPublic(
+            $file,
+            'hostel/rooms',
+            ['prefix' => "room_{$room->id}"]
+        );
+
+        // Update room record
+        $room->update(['image' => $result['path']]);
+
+        return $result;
+    }
+
+    /**
+     * Create hostel with image.
+     * 
+     * Prompt 412: Implement Hostel Media Uploads
+     * 
+     * @param array $data
+     * @param UploadedFile|null $image
+     * @return Hostel
+     */
+    public function createHostelWithImage(array $data, ?UploadedFile $image = null): Hostel
+    {
+        return DB::transaction(function () use ($data, $image) {
+            $hostel = $this->createHostel($data);
+
+            if ($image instanceof UploadedFile) {
+                $this->uploadHostelImage($hostel, $image);
+            }
+
+            return $hostel->fresh();
+        });
+    }
+
+    /**
+     * Create room with image.
+     * 
+     * Prompt 412: Implement Hostel Media Uploads
+     * 
+     * @param array $data
+     * @param UploadedFile|null $image
+     * @return HostelRoom
+     */
+    public function createRoomWithImage(array $data, ?UploadedFile $image = null): HostelRoom
+    {
+        return DB::transaction(function () use ($data, $image) {
+            $room = $this->createRoom($data);
+
+            if ($image instanceof UploadedFile) {
+                $this->uploadRoomImage($room, $image);
+            }
+
+            return $room->fresh();
+        });
+    }
+
+    /**
+     * Delete hostel image.
+     * 
+     * Prompt 412: Implement Hostel Media Uploads
+     * 
+     * @param Hostel $hostel
+     * @return bool
+     */
+    public function deleteHostelImage(Hostel $hostel): bool
+    {
+        if (!$hostel->image) {
+            return false;
+        }
+
+        // Delete file from storage
+        $this->fileUploadService->delete($hostel->image, 'public_uploads');
+
+        // Update hostel record
+        $hostel->update(['image' => null]);
+
+        return true;
+    }
+
+    /**
+     * Delete room image.
+     * 
+     * Prompt 412: Implement Hostel Media Uploads
+     * 
+     * @param HostelRoom $room
+     * @return bool
+     */
+    public function deleteRoomImage(HostelRoom $room): bool
+    {
+        if (!$room->image) {
+            return false;
+        }
+
+        // Delete file from storage
+        $this->fileUploadService->delete($room->image, 'public_uploads');
+
+        // Update room record
+        $room->update(['image' => null]);
+
+        return true;
+    }
+
+    /**
+     * Upload multiple hostel gallery images.
+     * 
+     * Prompt 412: Implement Hostel Media Uploads
+     * 
+     * @param Hostel $hostel
+     * @param array $files Array of UploadedFile objects
+     * @return array Array of upload results
+     */
+    public function uploadHostelGallery(Hostel $hostel, array $files): array
+    {
+        $results = [];
+        $gallery = $hostel->gallery ?? [];
+
+        foreach ($files as $file) {
+            if (!($file instanceof UploadedFile)) {
+                continue;
+            }
+
+            // Validate the file
+            $validation = $this->fileUploadService->validate($file, 'hostel_image');
+            if (!$validation['valid']) {
+                continue;
+            }
+
+            // Upload image
+            $result = $this->fileUploadService->uploadPublic(
+                $file,
+                'hostel/gallery',
+                ['prefix' => "hostel_{$hostel->id}"]
+            );
+
+            $gallery[] = [
+                'path' => $result['path'],
+                'original_name' => $result['original_name'],
+                'uploaded_at' => now()->toISOString(),
+            ];
+
+            $results[] = $result;
+        }
+
+        // Update hostel gallery
+        $hostel->update(['gallery' => $gallery]);
+
+        return $results;
+    }
+
+    /**
+     * Delete hostel gallery image.
+     * 
+     * Prompt 412: Implement Hostel Media Uploads
+     * 
+     * @param Hostel $hostel
+     * @param int $index Gallery image index
+     * @return bool
+     */
+    public function deleteHostelGalleryImage(Hostel $hostel, int $index): bool
+    {
+        $gallery = $hostel->gallery ?? [];
+
+        if (!isset($gallery[$index])) {
+            return false;
+        }
+
+        // Delete file from storage
+        $this->fileUploadService->delete($gallery[$index]['path'], 'public_uploads');
+
+        // Remove from gallery array
+        array_splice($gallery, $index, 1);
+        $hostel->update(['gallery' => $gallery]);
+
+        return true;
     }
 }

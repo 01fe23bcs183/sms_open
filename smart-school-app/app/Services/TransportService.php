@@ -7,18 +7,29 @@ use App\Models\TransportRouteStop;
 use App\Models\TransportVehicle;
 use App\Models\TransportStudent;
 use App\Models\Student;
+use App\Services\FileUploadService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\UploadedFile;
 
 /**
  * Transport Service
  * 
  * Prompt 332: Create Transport Service
+ * Prompt 412: Implement Transport Media Uploads
  * 
  * Manages transport routes and allocations. Assigns students to routes
- * and vehicles. Validates capacity and handles route fees.
+ * and vehicles. Validates capacity, handles route fees, and manages
+ * vehicle document uploads.
  */
 class TransportService
 {
+    protected FileUploadService $fileUploadService;
+
+    public function __construct(FileUploadService $fileUploadService)
+    {
+        $this->fileUploadService = $fileUploadService;
+    }
+
     /**
      * Create a transport route.
      * 
@@ -444,5 +455,140 @@ class TransportService
                 'fees' => $assignment->transport_fees,
             ];
         })->toArray();
+    }
+
+    /**
+     * Upload vehicle document.
+     * 
+     * Prompt 412: Implement Transport Media Uploads
+     * 
+     * @param TransportVehicle $vehicle
+     * @param UploadedFile $file
+     * @param string $documentType
+     * @return array Upload result with path and URL
+     */
+    public function uploadVehicleDocument(
+        TransportVehicle $vehicle,
+        UploadedFile $file,
+        string $documentType = 'general'
+    ): array {
+        // Validate the file
+        $validation = $this->fileUploadService->validate($file, 'vehicle_document');
+        if (!$validation['valid']) {
+            throw new \Exception(implode(', ', $validation['errors']));
+        }
+
+        // Upload document using FileUploadService
+        $result = $this->fileUploadService->uploadVehicleDocument($file, $vehicle->id);
+
+        // Store document info in vehicle's documents JSON field
+        $documents = $vehicle->documents ?? [];
+        $documents[$documentType] = [
+            'path' => $result['path'],
+            'original_name' => $result['original_name'],
+            'mime_type' => $result['mime_type'],
+            'size' => $result['size'],
+            'uploaded_at' => now()->toISOString(),
+        ];
+        $vehicle->update(['documents' => $documents]);
+
+        return $result;
+    }
+
+    /**
+     * Upload vehicle image.
+     * 
+     * Prompt 412: Implement Transport Media Uploads
+     * 
+     * @param TransportVehicle $vehicle
+     * @param UploadedFile $file
+     * @return array Upload result with path and URL
+     */
+    public function uploadVehicleImage(TransportVehicle $vehicle, UploadedFile $file): array
+    {
+        // Validate the file
+        $validation = $this->fileUploadService->validate($file, 'vehicle_image');
+        if (!$validation['valid']) {
+            throw new \Exception(implode(', ', $validation['errors']));
+        }
+
+        // Delete old image if exists
+        if ($vehicle->image) {
+            $this->fileUploadService->delete($vehicle->image, 'public_uploads');
+        }
+
+        // Upload new image
+        $result = $this->fileUploadService->uploadPublic(
+            $file,
+            'transport/vehicles',
+            ['prefix' => "vehicle_{$vehicle->id}"]
+        );
+
+        // Update vehicle record
+        $vehicle->update(['image' => $result['path']]);
+
+        return $result;
+    }
+
+    /**
+     * Delete vehicle document.
+     * 
+     * Prompt 412: Implement Transport Media Uploads
+     * 
+     * @param TransportVehicle $vehicle
+     * @param string $documentType
+     * @return bool
+     */
+    public function deleteVehicleDocument(TransportVehicle $vehicle, string $documentType): bool
+    {
+        $documents = $vehicle->documents ?? [];
+        
+        if (!isset($documents[$documentType])) {
+            return false;
+        }
+
+        // Delete file from storage
+        $this->fileUploadService->delete($documents[$documentType]['path'], 'private_uploads');
+
+        // Remove from documents array
+        unset($documents[$documentType]);
+        $vehicle->update(['documents' => $documents]);
+
+        return true;
+    }
+
+    /**
+     * Get vehicle documents.
+     * 
+     * Prompt 412: Implement Transport Media Uploads
+     * 
+     * @param TransportVehicle $vehicle
+     * @return array
+     */
+    public function getVehicleDocuments(TransportVehicle $vehicle): array
+    {
+        return $vehicle->documents ?? [];
+    }
+
+    /**
+     * Create vehicle with image.
+     * 
+     * Prompt 412: Implement Transport Media Uploads
+     * 
+     * @param array $data
+     * @param UploadedFile|null $image
+     * @return TransportVehicle
+     */
+    public function createVehicleWithImage(array $data, ?UploadedFile $image = null): TransportVehicle
+    {
+        return DB::transaction(function () use ($data, $image) {
+            $vehicle = $this->createVehicle($data);
+
+            if ($image instanceof UploadedFile) {
+                $this->uploadVehicleImage($vehicle, $image);
+            }
+
+            return $vehicle->fresh();
+        });
     }
 }

@@ -6,6 +6,8 @@ use App\Models\User;
 use App\Models\ClassSubject;
 use App\Models\Section;
 use App\Models\ClassTimetable;
+use App\Models\TeacherDocument;
+use App\Services\FileUploadService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -16,12 +18,22 @@ use Illuminate\Http\UploadedFile;
  * Teacher Service
  * 
  * Prompt 324: Create Teacher Service
+ * Prompt 395: Implement Teacher Photo Upload
+ * Prompt 396: Implement Teacher Document Uploads
  * 
  * Encapsulates teacher management rules including profile management,
  * class/subject assignments, and timetable availability validation.
+ * Uses FileUploadService for photo and document uploads.
  */
 class TeacherService
 {
+    protected FileUploadService $fileUploadService;
+
+    public function __construct(FileUploadService $fileUploadService)
+    {
+        $this->fileUploadService = $fileUploadService;
+    }
+
     /**
      * Create a new teacher with user account.
      * 
@@ -331,14 +343,182 @@ class TeacherService
     }
 
     /**
-     * Upload teacher avatar.
+     * Upload teacher avatar using FileUploadService.
+     * 
+     * Prompt 395: Implement Teacher Photo Upload
      * 
      * @param UploadedFile $file
-     * @return string
+     * @param int|null $teacherId
+     * @return string The stored file path
      */
-    private function uploadAvatar(UploadedFile $file): string
+    private function uploadAvatar(UploadedFile $file, ?int $teacherId = null): string
     {
-        $filename = 'teacher_' . time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
-        return $file->storeAs('teachers/avatars', $filename, 'public');
+        $result = $this->fileUploadService->uploadTeacherPhoto($file, $teacherId);
+        return $result['path'];
+    }
+
+    /**
+     * Upload teacher photo and update teacher record.
+     * 
+     * Prompt 395: Implement Teacher Photo Upload
+     * 
+     * @param User $teacher
+     * @param UploadedFile $file
+     * @return array Upload result with path and URL
+     */
+    public function uploadTeacherPhoto(User $teacher, UploadedFile $file): array
+    {
+        // Validate the file
+        $validation = $this->fileUploadService->validate($file, 'teacher_photo');
+        if (!$validation['valid']) {
+            throw new \Exception(implode(', ', $validation['errors']));
+        }
+
+        // Delete old avatar if exists
+        if ($teacher->avatar) {
+            $this->fileUploadService->delete($teacher->avatar, 'public_uploads');
+        }
+
+        // Upload new photo
+        $result = $this->fileUploadService->uploadTeacherPhoto($file, $teacher->id);
+
+        // Update teacher record
+        $teacher->update(['avatar' => $result['path']]);
+
+        return $result;
+    }
+
+    /**
+     * Upload a single teacher document.
+     * 
+     * Prompt 396: Implement Teacher Document Uploads
+     * 
+     * @param User $teacher
+     * @param UploadedFile $file
+     * @param string $documentType
+     * @param string|null $documentName
+     * @param string|null $expiryDate
+     * @return TeacherDocument
+     */
+    public function uploadTeacherDocument(
+        User $teacher,
+        UploadedFile $file,
+        string $documentType = 'other',
+        ?string $documentName = null,
+        ?string $expiryDate = null
+    ): TeacherDocument {
+        // Validate the file
+        $validation = $this->fileUploadService->validate($file, 'teacher_document');
+        if (!$validation['valid']) {
+            throw new \Exception(implode(', ', $validation['errors']));
+        }
+
+        // Upload document using FileUploadService
+        $result = $this->fileUploadService->uploadTeacherDocument($file, $teacher->id);
+
+        // Create document record
+        return TeacherDocument::create([
+            'user_id' => $teacher->id,
+            'document_type' => $documentType,
+            'document_name' => $documentName ?? $file->getClientOriginalName(),
+            'file_path' => $result['path'],
+            'original_name' => $result['original_name'],
+            'mime_type' => $result['mime_type'],
+            'size' => $result['size'],
+            'disk' => $result['disk'],
+            'expiry_date' => $expiryDate,
+        ]);
+    }
+
+    /**
+     * Delete a teacher document.
+     * 
+     * Prompt 396: Implement Teacher Document Uploads
+     * 
+     * @param TeacherDocument $document
+     * @return bool
+     */
+    public function deleteTeacherDocument(TeacherDocument $document): bool
+    {
+        // Delete file from storage
+        $this->fileUploadService->delete($document->file_path, $document->disk ?? 'private_uploads');
+
+        // Delete record
+        return $document->delete();
+    }
+
+    /**
+     * Replace a teacher document.
+     * 
+     * Prompt 396: Implement Teacher Document Uploads
+     * 
+     * @param TeacherDocument $document
+     * @param UploadedFile $file
+     * @param string|null $documentName
+     * @return TeacherDocument
+     */
+    public function replaceTeacherDocument(
+        TeacherDocument $document,
+        UploadedFile $file,
+        ?string $documentName = null
+    ): TeacherDocument {
+        // Validate the file
+        $validation = $this->fileUploadService->validate($file, 'teacher_document');
+        if (!$validation['valid']) {
+            throw new \Exception(implode(', ', $validation['errors']));
+        }
+
+        // Replace file using FileUploadService
+        $result = $this->fileUploadService->replace(
+            $file,
+            $document->file_path,
+            'teachers/documents',
+            'private_uploads'
+        );
+
+        // Update document record
+        $document->update([
+            'document_name' => $documentName ?? $file->getClientOriginalName(),
+            'file_path' => $result['path'],
+            'original_name' => $result['original_name'],
+            'mime_type' => $result['mime_type'],
+            'size' => $result['size'],
+        ]);
+
+        return $document->fresh();
+    }
+
+    /**
+     * Get all documents for a teacher.
+     * 
+     * Prompt 396: Implement Teacher Document Uploads
+     * 
+     * @param User $teacher
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getTeacherDocuments(User $teacher)
+    {
+        return TeacherDocument::where('user_id', $teacher->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
+    /**
+     * Get expiring documents for a teacher.
+     * 
+     * Prompt 396: Implement Teacher Document Uploads
+     * 
+     * @param User $teacher
+     * @param int $daysAhead
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getExpiringDocuments(User $teacher, int $daysAhead = 30)
+    {
+        return TeacherDocument::where('user_id', $teacher->id)
+            ->whereNotNull('expiry_date')
+            ->where('expiry_date', '<=', now()->addDays($daysAhead))
+            ->where('expiry_date', '>=', now())
+            ->orderBy('expiry_date')
+            ->get();
     }
 }

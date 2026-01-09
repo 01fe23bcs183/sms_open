@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\StudentDocument;
 use App\Models\StudentPromotion;
 use App\Models\AcademicSession;
+use App\Services\FileUploadService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -17,13 +18,22 @@ use Illuminate\Http\UploadedFile;
  * Student Service
  * 
  * Prompt 323: Create Student Service
+ * Prompt 393: Implement Student Photo Upload
+ * Prompt 394: Implement Student Document Uploads
  * 
  * Centralizes student business logic including admission, profile updates,
- * promotions, and status changes. Handles photo/document uploads and wraps
- * operations in transactions for safety.
+ * promotions, and status changes. Handles photo/document uploads using
+ * FileUploadService and wraps operations in transactions for safety.
  */
 class StudentService
 {
+    protected FileUploadService $fileUploadService;
+
+    public function __construct(FileUploadService $fileUploadService)
+    {
+        $this->fileUploadService = $fileUploadService;
+    }
+
     /**
      * Create a new student with user account.
      * 
@@ -379,38 +389,178 @@ class StudentService
     }
 
     /**
-     * Upload student photo.
+     * Upload student photo using FileUploadService.
+     * 
+     * Prompt 393: Implement Student Photo Upload
      * 
      * @param UploadedFile $file
-     * @return string
+     * @param int|null $studentId
+     * @return string The stored file path
      */
-    private function uploadPhoto(UploadedFile $file): string
+    private function uploadPhoto(UploadedFile $file, ?int $studentId = null): string
     {
-        $filename = 'student_' . time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
-        return $file->storeAs('students/photos', $filename, 'public');
+        $result = $this->fileUploadService->uploadStudentPhoto($file, $studentId);
+        return $result['path'];
     }
 
     /**
-     * Upload student documents.
+     * Upload student photo and update student record.
+     * 
+     * Prompt 393: Implement Student Photo Upload
      * 
      * @param Student $student
-     * @param array $documents
+     * @param UploadedFile $file
+     * @return array Upload result with path and URL
+     */
+    public function uploadStudentPhoto(Student $student, UploadedFile $file): array
+    {
+        // Validate the file
+        $validation = $this->fileUploadService->validate($file, 'student_photo');
+        if (!$validation['valid']) {
+            throw new \Exception(implode(', ', $validation['errors']));
+        }
+
+        // Delete old photo if exists
+        if ($student->photo) {
+            $this->fileUploadService->delete($student->photo, 'public_uploads');
+        }
+
+        // Upload new photo
+        $result = $this->fileUploadService->uploadStudentPhoto($file, $student->id);
+
+        // Update student record
+        $student->update(['photo' => $result['path']]);
+
+        return $result;
+    }
+
+    /**
+     * Upload student documents using FileUploadService.
+     * 
+     * Prompt 394: Implement Student Document Uploads
+     * 
+     * @param Student $student
+     * @param array $documents Array of ['file' => UploadedFile, 'type' => string, 'name' => string]
      * @return void
      */
     private function uploadDocuments(Student $student, array $documents): void
     {
         foreach ($documents as $document) {
             if (isset($document['file']) && $document['file'] instanceof UploadedFile) {
-                $filename = 'doc_' . time() . '_' . Str::random(10) . '.' . $document['file']->getClientOriginalExtension();
-                $path = $document['file']->storeAs('students/documents', $filename, 'public');
-                
-                StudentDocument::create([
-                    'student_id' => $student->id,
-                    'document_type' => $document['type'] ?? 'other',
-                    'document_name' => $document['name'] ?? $document['file']->getClientOriginalName(),
-                    'file_path' => $path,
-                ]);
+                $this->uploadStudentDocument($student, $document['file'], $document['type'] ?? 'other', $document['name'] ?? null);
             }
         }
+    }
+
+    /**
+     * Upload a single student document.
+     * 
+     * Prompt 394: Implement Student Document Uploads
+     * 
+     * @param Student $student
+     * @param UploadedFile $file
+     * @param string $documentType
+     * @param string|null $documentName
+     * @return StudentDocument
+     */
+    public function uploadStudentDocument(
+        Student $student,
+        UploadedFile $file,
+        string $documentType = 'other',
+        ?string $documentName = null
+    ): StudentDocument {
+        // Validate the file
+        $validation = $this->fileUploadService->validate($file, 'student_document');
+        if (!$validation['valid']) {
+            throw new \Exception(implode(', ', $validation['errors']));
+        }
+
+        // Upload document using FileUploadService
+        $result = $this->fileUploadService->uploadStudentDocument($file, $student->id);
+
+        // Create document record
+        return StudentDocument::create([
+            'student_id' => $student->id,
+            'document_type' => $documentType,
+            'document_name' => $documentName ?? $file->getClientOriginalName(),
+            'file_path' => $result['path'],
+            'original_name' => $result['original_name'],
+            'mime_type' => $result['mime_type'],
+            'size' => $result['size'],
+            'disk' => $result['disk'],
+        ]);
+    }
+
+    /**
+     * Delete a student document.
+     * 
+     * Prompt 394: Implement Student Document Uploads
+     * 
+     * @param StudentDocument $document
+     * @return bool
+     */
+    public function deleteStudentDocument(StudentDocument $document): bool
+    {
+        // Delete file from storage
+        $this->fileUploadService->delete($document->file_path, $document->disk ?? 'private_uploads');
+
+        // Delete record
+        return $document->delete();
+    }
+
+    /**
+     * Replace a student document.
+     * 
+     * Prompt 394: Implement Student Document Uploads
+     * 
+     * @param StudentDocument $document
+     * @param UploadedFile $file
+     * @param string|null $documentName
+     * @return StudentDocument
+     */
+    public function replaceStudentDocument(
+        StudentDocument $document,
+        UploadedFile $file,
+        ?string $documentName = null
+    ): StudentDocument {
+        // Validate the file
+        $validation = $this->fileUploadService->validate($file, 'student_document');
+        if (!$validation['valid']) {
+            throw new \Exception(implode(', ', $validation['errors']));
+        }
+
+        // Replace file using FileUploadService
+        $result = $this->fileUploadService->replace(
+            $file,
+            $document->file_path,
+            'students/documents',
+            'private_uploads'
+        );
+
+        // Update document record
+        $document->update([
+            'document_name' => $documentName ?? $file->getClientOriginalName(),
+            'file_path' => $result['path'],
+            'original_name' => $result['original_name'],
+            'mime_type' => $result['mime_type'],
+            'size' => $result['size'],
+        ]);
+
+        return $document->fresh();
+    }
+
+    /**
+     * Get all documents for a student.
+     * 
+     * Prompt 394: Implement Student Document Uploads
+     * 
+     * @param Student $student
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getStudentDocuments(Student $student)
+    {
+        return StudentDocument::where('student_id', $student->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
     }
 }

@@ -4,21 +4,33 @@ namespace App\Services;
 
 use App\Models\FeesTransaction;
 use App\Models\FeesAllotment;
+use App\Models\PaymentProof;
 use App\Models\Student;
+use App\Services\FileUploadService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Http\UploadedFile;
 use Carbon\Carbon;
 
 /**
  * Fee Payment Service
  * 
  * Prompt 330: Create Fee Payment Service
+ * Prompt 407: Implement Fee Payment Proof Upload
  * 
  * Isolates payment recording and ledger updates. Stores transactions,
- * updates balances, and writes accounting ledger entries.
+ * updates balances, writes accounting ledger entries, and handles
+ * payment proof uploads.
  */
 class FeePaymentService
 {
+    protected FileUploadService $fileUploadService;
+
+    public function __construct(FileUploadService $fileUploadService)
+    {
+        $this->fileUploadService = $fileUploadService;
+    }
+
     /**
      * Record a fee payment.
      * 
@@ -414,5 +426,188 @@ class FeePaymentService
             'today_collection' => $todayCollection,
             'month_collection' => $monthCollection,
         ];
+    }
+
+    /**
+     * Upload payment proof for a transaction.
+     * 
+     * Prompt 407: Implement Fee Payment Proof Upload
+     * 
+     * @param FeesTransaction $transaction
+     * @param UploadedFile $file
+     * @param string|null $description
+     * @return PaymentProof
+     */
+    public function uploadPaymentProof(
+        FeesTransaction $transaction,
+        UploadedFile $file,
+        ?string $description = null
+    ): PaymentProof {
+        // Validate the file
+        $validation = $this->fileUploadService->validate($file, 'payment_proof');
+        if (!$validation['valid']) {
+            throw new \Exception(implode(', ', $validation['errors']));
+        }
+
+        // Upload file using FileUploadService
+        $result = $this->fileUploadService->uploadPaymentProof($file, $transaction->id);
+
+        // Create payment proof record
+        return PaymentProof::create([
+            'fees_transaction_id' => $transaction->id,
+            'file_path' => $result['path'],
+            'original_name' => $result['original_name'],
+            'mime_type' => $result['mime_type'],
+            'size' => $result['size'],
+            'disk' => $result['disk'],
+            'description' => $description,
+            'uploaded_by' => auth()->id(),
+        ]);
+    }
+
+    /**
+     * Record payment with proof upload.
+     * 
+     * Prompt 407: Implement Fee Payment Proof Upload
+     * 
+     * @param int $studentId
+     * @param int $feesAllotmentId
+     * @param float $amount
+     * @param string $paymentMethod
+     * @param UploadedFile|null $proofFile
+     * @param int|null $receivedBy
+     * @param array $additionalData
+     * @return FeesTransaction
+     */
+    public function recordPaymentWithProof(
+        int $studentId,
+        int $feesAllotmentId,
+        float $amount,
+        string $paymentMethod,
+        ?UploadedFile $proofFile = null,
+        ?int $receivedBy = null,
+        array $additionalData = []
+    ): FeesTransaction {
+        return DB::transaction(function () use ($studentId, $feesAllotmentId, $amount, $paymentMethod, $proofFile, $receivedBy, $additionalData) {
+            // Record the payment
+            $transaction = $this->recordPayment(
+                $studentId,
+                $feesAllotmentId,
+                $amount,
+                $paymentMethod,
+                $receivedBy,
+                $additionalData
+            );
+
+            // Upload proof if provided
+            if ($proofFile instanceof UploadedFile) {
+                $this->uploadPaymentProof($transaction, $proofFile, $additionalData['proof_description'] ?? null);
+            }
+
+            return $transaction->load('paymentProofs');
+        });
+    }
+
+    /**
+     * Delete a payment proof.
+     * 
+     * Prompt 407: Implement Fee Payment Proof Upload
+     * 
+     * @param PaymentProof $proof
+     * @return bool
+     */
+    public function deletePaymentProof(PaymentProof $proof): bool
+    {
+        // Delete file from storage
+        $this->fileUploadService->delete($proof->file_path, $proof->disk ?? 'private_uploads');
+
+        // Delete record
+        return $proof->delete();
+    }
+
+    /**
+     * Replace a payment proof.
+     * 
+     * Prompt 407: Implement Fee Payment Proof Upload
+     * 
+     * @param PaymentProof $proof
+     * @param UploadedFile $file
+     * @return PaymentProof
+     */
+    public function replacePaymentProof(PaymentProof $proof, UploadedFile $file): PaymentProof
+    {
+        // Validate the file
+        $validation = $this->fileUploadService->validate($file, 'payment_proof');
+        if (!$validation['valid']) {
+            throw new \Exception(implode(', ', $validation['errors']));
+        }
+
+        // Replace file using FileUploadService
+        $result = $this->fileUploadService->replace(
+            $file,
+            $proof->file_path,
+            'payments/proofs',
+            'private_uploads'
+        );
+
+        // Update proof record
+        $proof->update([
+            'file_path' => $result['path'],
+            'original_name' => $result['original_name'],
+            'mime_type' => $result['mime_type'],
+            'size' => $result['size'],
+        ]);
+
+        return $proof->fresh();
+    }
+
+    /**
+     * Get payment proofs for a transaction.
+     * 
+     * Prompt 407: Implement Fee Payment Proof Upload
+     * 
+     * @param FeesTransaction $transaction
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getPaymentProofs(FeesTransaction $transaction)
+    {
+        return PaymentProof::where('fees_transaction_id', $transaction->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
+    /**
+     * Verify a payment proof.
+     * 
+     * Prompt 407: Implement Fee Payment Proof Upload
+     * 
+     * @param PaymentProof $proof
+     * @param int $verifiedBy
+     * @return PaymentProof
+     */
+    public function verifyPaymentProof(PaymentProof $proof, int $verifiedBy): PaymentProof
+    {
+        $proof->update([
+            'is_verified' => true,
+            'verified_by' => $verifiedBy,
+            'verified_at' => now(),
+        ]);
+
+        return $proof->fresh();
+    }
+
+    /**
+     * Get unverified payment proofs.
+     * 
+     * Prompt 407: Implement Fee Payment Proof Upload
+     * 
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getUnverifiedProofs()
+    {
+        return PaymentProof::with(['feesTransaction.student.user'])
+            ->where('is_verified', false)
+            ->orderBy('created_at', 'desc')
+            ->get();
     }
 }
